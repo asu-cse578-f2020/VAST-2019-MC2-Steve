@@ -128,13 +128,18 @@ document.addEventListener('DOMContentLoaded', function() {
            return mapProjection(coordinates)[1];
          })
          .attr("r", 4)
-         .style("fill", "orange")
+         .style("fill", "#33e613")
          .style("opacity", 1)
-         .style("stroke", "white");
+         .style("stroke", "#33e613");
 
     var circles = d3.selectAll("circle");
     pulse(circles);
+
+    // The pulsating effect shows spikes in radiation measurements. When the radius of the
+    // circle increases, it is an indication of radiation detection.
+
     function pulse(circle) {
+
         let i = 0;
         (function repeat() {
 
@@ -147,15 +152,19 @@ document.addEventListener('DOMContentLoaded', function() {
             .duration(100)
             .attr("stroke-width", 0)
             .attr('stroke-opacity', 0.5)
+            .style("fill", function(d) { if (radiationMeasurements[d["Sensor-id"]][i] > 15) return "red"; else return "#33e613"; })
+            .style("stroke", function(d) { if (radiationMeasurements[d["Sensor-id"]][i] > 15) return "red"; else return "#33e613"; })
+            .attr("r", function(d) { if (radiationMeasurements[d["Sensor-id"]][i] > 15) return 15; else return 4; })
             .transition()
             .duration(1000)
-            .attr("stroke-width", function(d) { return 100; })
+            .attr("stroke-width", function(d) { return radiationMeasurements[d["Sensor-id"]][i] + 60; })
             .attr('stroke-opacity', 0)
             .ease(d3.easeSin)
             .on("end", repeat);
 
             if (i == 1200) i = -1;
             i += 1;
+
         })();
      }
 
