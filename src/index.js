@@ -1,8 +1,12 @@
 document.addEventListener('DOMContentLoaded', function() {
 
+    var lineSvg = d3.select(".staticSensorLineChart")
+                    .attr("width", 1264)
+                    .attr("height", 750);
+
     var map = d3.select(".map")
-                .attr("width", 1000)
-                .attr("height", 700);
+                .attr("width", 1264)
+                .attr("height", 550);
 
 
     // Setting projection parameters
@@ -83,33 +87,33 @@ document.addEventListener('DOMContentLoaded', function() {
                    .style("stroke", "gray");
 
 
-       // Neighborhood names at the centroid of each polygon
-       map.append("g")
-           .attr("class", "neighborhood-names")
-           .selectAll("text")
-           .data(geoData.features)
-           .enter()
-           .append("svg:text")
-           .text(function(d){
-             return d.properties.Name;
-           })
-           .attr("x", function(d){
-             let temp = {};
-             temp.geometry = d.geometry;
-             temp.geometry.type = "MultiPolygon";
-             temp.geometry.coordinates = [d.geometry.coordinates[0]];
-             return geoPath.centroid(temp.geometry)[0];
-           })
-           .attr("y", function(d){
-             let temp = {};
-             temp.geometry = d.geometry;
-             temp.geometry.type = "MultiPolygon";
-             temp.geometry.coordinates = [d.geometry.coordinates[0]];
-             return geoPath.centroid(temp.geometry)[1];
-           })
-           .attr("text-anchor","middle")
-           .attr("fill", "white")
-           .style("font-size", "9px");
+     // Neighborhood names at the centroid of each polygon
+     map.append("g")
+         .attr("class", "neighborhood-names")
+         .selectAll("text")
+         .data(geoData.features)
+         .enter()
+         .append("svg:text")
+         .text(function(d){
+           return d.properties.Name;
+         })
+         .attr("x", function(d){
+           let temp = {};
+           temp.geometry = d.geometry;
+           temp.geometry.type = "MultiPolygon";
+           temp.geometry.coordinates = [d.geometry.coordinates[0]];
+           return geoPath.centroid(temp.geometry)[0];
+         })
+         .attr("y", function(d){
+           let temp = {};
+           temp.geometry = d.geometry;
+           temp.geometry.type = "MultiPolygon";
+           temp.geometry.coordinates = [d.geometry.coordinates[0]];
+           return geoPath.centroid(temp.geometry)[1];
+         })
+         .attr("text-anchor","middle")
+         .attr("fill", "white")
+         .style("font-size", "9px");
 
 
       map.append("g")
@@ -127,7 +131,7 @@ document.addEventListener('DOMContentLoaded', function() {
            let coordinates = [parseFloat(d.Long), parseFloat(d.Lat)];
            return mapProjection(coordinates)[1];
          })
-         .attr("r", 4)
+         .attr("r", 2)
          .style("fill", "#33e613")
          .style("opacity", 1)
          .style("stroke", "#33e613");
@@ -154,10 +158,10 @@ document.addEventListener('DOMContentLoaded', function() {
             .attr('stroke-opacity', 0.5)
             .style("fill", function(d) { if (radiationMeasurements[d["Sensor-id"]][i] > 15) return "red"; else return "#33e613"; })
             .style("stroke", function(d) { if (radiationMeasurements[d["Sensor-id"]][i] > 15) return "red"; else return "#33e613"; })
-            .attr("r", function(d) { if (radiationMeasurements[d["Sensor-id"]][i] > 15) return 15; else return 4; })
+            .attr("r", function(d) { if (radiationMeasurements[d["Sensor-id"]][i] > 15) return 10; else return 2; })
             .transition()
             .duration(1000)
-            .attr("stroke-width", function(d) { return radiationMeasurements[d["Sensor-id"]][i] + 60; })
+            .attr("stroke-width", function(d) { return radiationMeasurements[d["Sensor-id"]][i] + 70; })
             .attr('stroke-opacity', 0)
             .ease(d3.easeSin)
             .on("end", repeat);
@@ -167,6 +171,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         })();
      }
+
+    drawLineChart(lineSvg, radiationMeasurements);
 
   } // End of drawMap function
 
