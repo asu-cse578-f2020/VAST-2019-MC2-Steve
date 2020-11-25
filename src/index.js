@@ -1,5 +1,10 @@
 document.addEventListener('DOMContentLoaded', function() {
 
+    let factoryGlyph = "M456.723,121,328.193,248H312V121H291.3L166.084,248H152V32H32V480H480V121ZM172,432H132V392h40Zm0-80H132V312h40Zm80,80H212V392h40Zm0-80H212V312h40Zm80,80H292V392h40Zm0-80H292V312h40Zm80,80H372V392h40Zm0-80H372V312h40Z";
+    let hospitalGlyph = "M352,104V208H160V104H88V448H238V376h38v72H424V104ZM197,394H157V354h40Zm0-92H157V262h40Zm80,0H237V262h40Zm80,92H317V354h40Zm0-92H317V262h40ZM352,104V208H160V104H88V448H238V376h38v72H424V104ZM197,394H157V354h40Zm0-92H157V262h40Zm80,0H237V262h40Zm80,92H317V354h40Zm0-92H317V262h40Z";
+
+    var alwaysSafePlantLocation = [ -119.784825, 0.162679 ];
+
     var lineSvg = d3.select(".staticSensorLineChart")
                     .attr("width", 1264)
                     .attr("height", 750);
@@ -20,14 +25,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // to turn geographical coordinates into screen coordinates
     var geoPath = d3.geoPath().projection(mapProjection);
 
+
     d3.queue()
       .defer(d3.json, "data/StHimark.json")
       .defer(d3.csv, "data/StaticSensorLocations.csv")
       .defer(d3.csv, "data/StaticSensorReadingsAggregate.csv")
+      .defer(d3.csv, "data/HospitalLocations.csv")
       .await(drawMap);
 
 
-    function drawMap(error, geoData, staticSensorLocations, staticSensorReadings) {
+    function drawMap(error, geoData, staticSensorLocations, staticSensorReadings, hospitalLocations) {
 
       if (error) console.log(error);
 
@@ -76,7 +83,8 @@ document.addEventListener('DOMContentLoaded', function() {
       });
 
 
-      geo_map = map.append("g")
+     // Choropleth map
+     geo_map = map.append("g")
                    .attr("class", "st-himark-map")
                    .selectAll("path")
                    .data(geoData.features)
@@ -85,6 +93,14 @@ document.addEventListener('DOMContentLoaded', function() {
                    .attr("d", geoPath)
                    .style("fill", "black")
                    .style("stroke", "gray");
+
+     // Always Safe Nuclear Plant
+     map.append("g")
+         .attr("class", "nuclear-plant")
+         .append("path")
+         .attr("d", factoryGlyph)
+         .attr("transform", "translate(" + mapProjection(alwaysSafePlantLocation)[0] + ", " + mapProjection(alwaysSafePlantLocation)[1] + ")scale(0.04)")
+         .style("fill", "blue");
 
 
      // Neighborhood names at the centroid of each polygon
@@ -116,6 +132,22 @@ document.addEventListener('DOMContentLoaded', function() {
          .style("font-size", "9px");
 
 
+      // Hospitals
+      map.append("g")
+         .attr("class", "hospitals")
+         .selectAll("path")
+         .data(hospitalLocations)
+         .enter()
+         .append("path")
+         .attr("d", hospitalGlyph)
+         .attr("transform", function(d) {
+           let coordinates = [ parseFloat(d.Long), parseFloat(d.Lat) ];
+           return "translate(" + mapProjection(coordinates)[0] + ", " + mapProjection(coordinates)[1] + ")scale(0.04)";
+         })
+         .style("fill", "orange");
+
+
+      // Static sensors
       map.append("g")
          .attr("class", "static-sensors")
          .selectAll("rect")
