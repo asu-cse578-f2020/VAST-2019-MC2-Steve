@@ -17,17 +17,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 .attr("width", 1264)
                 .attr("height", 750);
 
-
-
     // Setting projection parameters
     var mapProjection = d3.geoMercator()
                           .scale(135000)
-                          .center([-119.88075,0.125])
+                          .center([ -119.88075, 0.125 ])
                           .translate([ 500, 250 ]);
 
-
-    // Create geoPath function that uses built-in D3 functionality
-    // to turn geographical coordinates into screen coordinates
     var geoPath = d3.geoPath().projection(mapProjection);
 
 
@@ -35,11 +30,12 @@ document.addEventListener('DOMContentLoaded', function() {
       .defer(d3.json, "data/StHimark.json")
       .defer(d3.csv, "data/StaticSensorLocations.csv")
       .defer(d3.csv, "data/StaticSensorReadingsAggregate.csv")
+      .defer(d3.csv, "data/MobileSensorReadingsAggregate.csv")
       .defer(d3.csv, "data/HospitalLocations.csv")
       .await(drawMap);
 
 
-    function drawMap(error, geoData, staticSensorLocations, staticSensorReadings, hospitalLocations) {
+    function drawMap(error, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings, hospitalLocations) {
 
       if (error) console.log(error);
 
@@ -74,19 +70,32 @@ document.addEventListener('DOMContentLoaded', function() {
       }); */
 
       // Radiation Measurements for each static sensor
-      radiationMeasurements = {};
-      staticSensorLocations.forEach(function(d) {
-        let sensorID = d["Sensor-id"];
-        radiationMeasurements[sensorID] = [];
-        let curr = staticSensorReadings.filter(function(x) {
-          return x["Sensor-id"] == sensorID;
-        });
+     radiationMeasurements = {};
+     staticSensorLocations.forEach(d => {
+       let sensorID = d["Sensor-id"];
+       radiationMeasurements[sensorID] = [];
+       let curr = staticSensorReadings.filter(x => {
+         return x["Sensor-id"] == sensorID;
+       });
 
-        curr.forEach(function(x) {
-          radiationMeasurements[sensorID].push(parseFloat(x.Value));
-        });
-      });
+       curr.forEach( x => {
+         radiationMeasurements[sensorID].push(parseFloat(x.Value));
+       });
+     });
 
+     drawLineChart(lineSvg, radiationMeasurements);
+     var regionFreqArray = drawBarChart(barChart, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings);
+     var regionFreqDict = {};
+     regionFreqArray.forEach(d => { regionFreqDict[d[0].toString()] = d[1]; });
+
+
+     /**
+     Color scale for the choropleth map.
+    Based on the number of sensor readings per region. **/
+
+     var geoMapColorScale = d3.scaleLog()
+                              .domain([ 2000, 7994 ])
+                              .range([ "#c6dbef", "#6baed6", "#3182bd", "#08519c" ]);
 
      // Choropleth map
      geo_map = map.append("g")
@@ -96,36 +105,43 @@ document.addEventListener('DOMContentLoaded', function() {
                    .enter()
                    .append("path")
                    .attr("d", geoPath)
-                   .style("fill", "black")
-                   .style("stroke", "gray");
+                   .style("fill", d => { return geoMapColorScale(regionFreqDict[d.properties.Name]); })
+                   .style("stroke", "white")
+                   .on("mouseover", function(d) {
+                     d3.select(this).style("stroke", "white").style("stroke-width", 10);
+                   })
+                   .on("mouseout", function(d) {
+                     d3.select(this).style("stroke", "white").style("stroke-width", 1);
+                   });
+
 
      // Always Safe Nuclear Plant
      map.append("g")
-         .attr("class", "nuclear-plant")
-         .append("path")
-         .attr("d", factoryGlyph)
-         .attr("transform", "translate(" + mapProjection(alwaysSafePlantLocation)[0] + ", " + mapProjection(alwaysSafePlantLocation)[1] + ")scale(0.04)")
-         .style("fill", "blue");
+        .attr("class", "nuclear-plant")
+        .append("path")
+        .attr("d", factoryGlyph)
+        .attr("transform", "translate(" + mapProjection(alwaysSafePlantLocation)[0] + ", " + mapProjection(alwaysSafePlantLocation)[1] + ")scale(0.04)")
+        .style("fill", "orange");
 
 
      // Neighborhood names at the centroid of each polygon
      map.append("g")
-         .attr("class", "neighborhood-names")
-         .selectAll("text")
-         .data(geoData.features)
-         .enter()
+        .attr("class", "neighborhood-names")
+        .selectAll("text")
+        .data(geoData.features)
+        .enter()
          .append("svg:text")
-         .text(function(d){
+         .text(d => {
            return d.properties.Name;
          })
-         .attr("x", function(d){
+         .attr("x", d => {
            let temp = {};
            temp.geometry = d.geometry;
            temp.geometry.type = "MultiPolygon";
            temp.geometry.coordinates = [d.geometry.coordinates[0]];
            return geoPath.centroid(temp.geometry)[0];
          })
-         .attr("y", function(d){
+         .attr("y", d => {
            let temp = {};
            temp.geometry = d.geometry;
            temp.geometry.type = "MultiPolygon";
@@ -133,8 +149,8 @@ document.addEventListener('DOMContentLoaded', function() {
            return geoPath.centroid(temp.geometry)[1];
          })
          .attr("text-anchor","middle")
-         .attr("fill", "white")
-         .style("font-size", "9px");
+         .attr("fill", "black")
+         .style("font-size", "12px");
 
 
       // Hospitals
@@ -145,40 +161,48 @@ document.addEventListener('DOMContentLoaded', function() {
          .enter()
          .append("path")
          .attr("d", hospitalGlyph)
-         .attr("transform", function(d) {
+         .attr("transform", d => {
            let coordinates = [ parseFloat(d.Long), parseFloat(d.Lat) ];
            return "translate(" + mapProjection(coordinates)[0] + ", " + mapProjection(coordinates)[1] + ")scale(0.04)";
          })
-         .style("fill", "orange");
+         .style("fill", "black");
 
 
       // Static sensors
       map.append("g")
          .attr("class", "static-sensors")
-         .selectAll("rect")
+         .selectAll("circle")
          .data(staticSensorLocations)
          .enter()
          .append("circle")
-         .attr("id", function(d) { return "static-sensor-" + d["Sensor-id"]; })
-         .attr("cx", function(d) {
+         .attr("id", d => { return "static-sensor-" + d["Sensor-id"]; })
+         .attr("cx", d => {
            let coordinates = [parseFloat(d.Long), parseFloat(d.Lat)];
            return mapProjection(coordinates)[0];
          })
-         .attr("cy", function (d) {
+         .attr("cy", d => {
            let coordinates = [parseFloat(d.Long), parseFloat(d.Lat)];
            return mapProjection(coordinates)[1];
          })
          .attr("r", 2)
-         .style("fill", "#33e613")
+         .style("fill", "#00d210")
          .style("opacity", 1)
-         .style("stroke", "#33e613");
+         .style("stroke", "#00d210")
+         .on("click", function(d) {
+           // Clear the colours of all the line charts
+           d3.selectAll(".line").attr("stroke", "black");
 
-    var circles = d3.selectAll("circle");
+           // Highlight the corresponding line chart
+           let line = d3.select(".static-sensor-curve-" + d["Sensor-id"]);
+           line.select("path").attr("stroke", "orange");
+
+         });
+
+    var circles = d3.select(".static-sensors").selectAll("circle");
     pulse(circles);
 
     // The pulsating effect shows spikes in radiation measurements. When the radius of the
     // circle increases, it is an indication of radiation detection.
-
     function pulse(circle) {
 
         let i = 0;
@@ -193,12 +217,12 @@ document.addEventListener('DOMContentLoaded', function() {
             .duration(100)
             .attr("stroke-width", 0)
             .attr('stroke-opacity', 0.5)
-            .style("fill", function(d) { if (radiationMeasurements[d["Sensor-id"]][i] > 15) return "red"; else return "#33e613"; })
-            .style("stroke", function(d) { if (radiationMeasurements[d["Sensor-id"]][i] > 15) return "red"; else return "#33e613"; })
-            .attr("r", function(d) { if (radiationMeasurements[d["Sensor-id"]][i] > 15) return 10; else return 2; })
+            .style("fill", d => { if (radiationMeasurements[d["Sensor-id"]][i] > 15) return "red"; else return "#00d210"; })
+            .style("stroke", d => { if (radiationMeasurements[d["Sensor-id"]][i] > 15) return "red"; else return "#00d210"; })
+            .attr("r", d => { if (radiationMeasurements[d["Sensor-id"]][i] > 15) return 10; else return 2; })
             .transition()
             .duration(1000)
-            .attr("stroke-width", function(d) { return radiationMeasurements[d["Sensor-id"]][i] + 70; })
+            .attr("stroke-width", d => { return radiationMeasurements[d["Sensor-id"]][i] + 70; })
             .attr('stroke-opacity', 0)
             .ease(d3.easeSin)
             .on("end", repeat);
@@ -208,9 +232,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         })();
      }
-
-    drawLineChart(lineSvg, radiationMeasurements);
-    drawBarChart(barChart, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings);
 
   } // End of drawMap function
 

@@ -12,7 +12,7 @@ function drawLineChart(lineSvg, radiationMeasurements) {
 
     for (var i = 0; i < keys.length; i++) {
 
-      let objects = data.filter(function(x) {
+      let objects = data.filter(x => {
                     return x["Sensor-id"] == keys[i];
                 });
 
@@ -69,14 +69,21 @@ function drawLineChart(lineSvg, radiationMeasurements) {
         });
 
        g.append("path")
+        .attr("class", "line")
         .attr("transform", "translate(100," + (lineInnerHeight * i) + ")")
         .datum(radiationMeasurements[key.toString()])
         .attr("fill", "none")
-        .attr("stroke", "#E64613")
+        .attr("stroke", "black")
         .attr("stroke-width", 1.5)
         .attr("d", d3.line()
                      .x(function(d, idx) { return xScale(idx); } )
-                     .y(function(d, idx) { return yScale(d); } ));
+                     .y(function(d, idx) { return yScale(d); } ))
+        .on("mouseover", function(d) {
+          d3.select(this).attr("stroke-width", 2.5);
+        })
+        .on("mouseout", function(d) {
+          d3.select(this).attr("stroke-width", 1.5);
+        });
 
 
      });

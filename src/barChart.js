@@ -28,7 +28,6 @@ function drawBarChart(barChartSVG, geoData, staticSensorLocations, staticSensorR
         }
     })
 
-
     staticSensorReadings.forEach(reading => {
         geoData.features.forEach(region => {
             if (d3.geoContains(region, reading[CO_ORDINATES]))
@@ -47,12 +46,8 @@ function drawBarChart(barChartSVG, geoData, staticSensorLocations, staticSensorR
         });
     });
 
-
-    let g = barChartSVG
-        .append("g")
-            .attr("transform",
-                "translate(" + margin.left + "," + margin.top + ")");
-
+    let g = barChartSVG.append("g")
+                       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     var xScale = d3.scaleBand()
         .range([ 0, width ])
@@ -67,12 +62,13 @@ function drawBarChart(barChartSVG, geoData, staticSensorLocations, staticSensorR
           .style("text-anchor", "end");
 
     var yScale = d3.scaleLinear()
-          .domain([0, 10000])
-          .range([ height, 0]);
+          .domain([ 0, 10000 ])
+          .range([ height, 0 ]);
     g.append("g")
           .call(d3.axisLeft(yScale));
 
     let regionFreqArray = Array.from(regionMap, ([name, value]) => ([name, value]));
+
     g.selectAll("myline")
         .data(regionFreqArray)
         .enter()
@@ -81,7 +77,7 @@ function drawBarChart(barChartSVG, geoData, staticSensorLocations, staticSensorR
             .attr("x2", d => xScale(d[0]))
             .attr("y1", d => yScale(d[1]))
             .attr("y2", yScale(0))
-            .attr("stroke", "grey");
+            .attr("stroke", "gray")
 
     g.selectAll("mycircle")
         .data(regionFreqArray)
@@ -89,10 +85,17 @@ function drawBarChart(barChartSVG, geoData, staticSensorLocations, staticSensorR
         .append("circle")
             .attr("cx", d => xScale(d[0]))
             .attr("cy", d => yScale(d[1]))
-            .attr("r", "4")
+            .attr("r", "6")
             .style("fill", "#69b3a2")
-            .attr("stroke", "black");
-        
+            .attr("stroke", "black")
+            .on("mouseover", function(d) {
+              d3.select(this).attr("r", "12");
+            })
+            .on("mouseout", function(d) {
+              d3.select(this).attr("r", "6");
+            });
+
+    return regionFreqArray;
 }
 
 function getNameFromGeoData(data)
