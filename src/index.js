@@ -8,6 +8,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 .attr("width", 1264)
                 .attr("height", 550);
 
+    var barChart = d3.select(".barChart")
+                .attr("width", 1264)
+                .attr("height", 750);
+    
+
 
     // Setting projection parameters
     var mapProjection = d3.geoMercator()
@@ -24,10 +29,11 @@ document.addEventListener('DOMContentLoaded', function() {
       .defer(d3.json, "data/StHimark.json")
       .defer(d3.csv, "data/StaticSensorLocations.csv")
       .defer(d3.csv, "data/StaticSensorReadingsAggregate.csv")
+      .defer(d3.csv, "data/MobileSensorReadingsAggregate.csv")
       .await(drawMap);
 
 
-    function drawMap(error, geoData, staticSensorLocations, staticSensorReadings) {
+    function drawMap(error, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings) {
 
       if (error) console.log(error);
 
@@ -173,6 +179,7 @@ document.addEventListener('DOMContentLoaded', function() {
      }
 
     drawLineChart(lineSvg, radiationMeasurements);
+    drawBarChart(barChart, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings);
 
   } // End of drawMap function
 
