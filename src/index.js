@@ -47,38 +47,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
       if (error) console.log(error);
 
-      /* Hashmap for associating area ID with sensor-id { areaID: sensorID }
-      var hashmap = {};
+      // Hashmap for associating area ID with sensor-id { areaID: sensorID }
+      var hashmap = new Map();
       staticSensorLocations.forEach(function(d) {
-        let point = [parseFloat(d.Long), parseFloat(d.Lat)];
+        let point = [ parseFloat(d.Long), parseFloat(d.Lat) ];
         for (var i = 0; i < geoData.features.length; i++) {
-          if (d3.geoContains(geoData.features[i], point))
-            hashmap[geoData.features[i].properties["Id"]] = d["Sensor-id"];
+
+          let locationID = geoData.features[i].properties["Id"];
+
+          if (d3.geoContains(geoData.features[i], point)) {
+            if (hashmap.has(locationID)) {
+              hashmap.get(locationID).push( d["Sensor-id"] );
+            }
+            else {
+              hashmap.set(locationID, [ d["Sensor-id"] ]);
+            }
+          }
         }
       });
-      */
-
-      /* Radiatian Measurements every 6 minutes grouped-by area ID
-      var raditionMeasurements = {};
-      geoData.features.forEach(function(d) {
-        // For each area, first find the sensor present in that area, and then find its corresponding radiation measurements
-        let regionID = d.properties["Id"];
-        let sensorID = hashmap[regionID];
-        raditionMeasurements[sensorID] = [];
-
-        // filter staticSensorAggregateData for this particular sensorID
-        let curr = staticSensorReadings.filter(function(x) {
-          return x["Sensor-id"] == sensorID;
-        });
-
-        curr.forEach(function(x) {
-          raditionMeasurements[sensorID].push(parseFloat(x.Value));
-        });
-
-      }); */
 
      // Radiation Measurements for each static sensor
-
      radiationMeasurements = {};
      staticSensorLocations.forEach(d => {
        let sensorID = d["Sensor-id"];
@@ -132,9 +120,12 @@ document.addEventListener('DOMContentLoaded', function() {
                    .on("click", function(d) {
                       $("#sensorReadingsModal").modal("toggle");
                       d3.select("#sensorReadingsModal").select(".modal-title").text(d.properties.Name);
-                      //var modal_body = d3.select("#sensorReadingsModal").select(".modal-body");
-                      //var modal_svg = modal_body.append("svg");
-                      drawLineChart(lineSvg, radiationMeasurements, toolTipDiv);
+
+                      // Remove all the child nodes of lineSvg
+                      d3.select(".staticSensorLineChart").selectAll("g").remove();
+                      let keys = hashmap.get(d.properties.Id);
+                      if (keys.length > 0)
+                        drawLineChart(lineSvg, radiationMeasurements, keys, toolTipDiv);
                    });
 
 

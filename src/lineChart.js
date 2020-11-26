@@ -1,11 +1,11 @@
-function drawLineChart(lineSvg, radiationMeasurements, toolTipDiv) {
+function drawLineChart(lineSvg, radiationMeasurements, keys, toolTipDiv) {
 
   var lineMargin = { top: 10, right: 10, bottom: 20, left: 10 };
   var lineWidth = +lineSvg.style('width').replace('px','') - 100;
   var lineHeight = 120;
   var lineInnerWidth = lineWidth - lineMargin.left - lineMargin.right - 30;
   var lineInnerHeight = lineHeight - lineMargin.top - lineMargin.bottom;
-  var keys = Object.keys(radiationMeasurements);
+  //var keys = Object.keys(radiationMeasurements);
   var parseTime = d3.timeParse("%Y-%m-%d %H:%M:%S");
 
 
@@ -61,17 +61,26 @@ function drawLineChart(lineSvg, radiationMeasurements, toolTipDiv) {
       });
 
 
-     g.append("path")
-      .attr("class", "line")
-      .attr("transform", "translate(100," + (lineInnerHeight * i) + ")")
-      .datum(radiationMeasurements[key.toString()].readings)
-      .attr("fill", "none")
-      .attr("stroke", "black")
-      .attr("stroke-width", 1.2)
-      .attr("d", d3.line()
-                   .x( function(d, idx) { return xScale(radiationMeasurements[key.toString()].timestamps[idx]); } )
-                   .y( function(d) { return yScale(d); } )
-      );
+     var path = g.append("path")
+                 .attr("class", "line")
+                 .attr("transform", "translate(100," + (lineInnerHeight * i) + ")")
+                 .datum(radiationMeasurements[key.toString()].readings)
+                 .attr("fill", "none")
+                 .attr("stroke", "black")
+                 .attr("stroke-width", 1.2)
+                 .attr("d", d3.line()
+                               .x( function(d, idx) { return xScale(radiationMeasurements[key.toString()].timestamps[idx]); } )
+                               .y( function(d) { return yScale(d); } )
+                  );
+
+     var totalLength = path.node().getTotalLength();
+
+     path.attr("stroke-dasharray", totalLength + " " + totalLength)
+         .attr("stroke-dashoffset", totalLength)
+        .transition()
+         .duration(4000)
+         .ease(d3.easeLinear)
+         .attr("stroke-dashoffset", 0);
 
       // Code for circular tool-tip
      var focus = g.append("g")
