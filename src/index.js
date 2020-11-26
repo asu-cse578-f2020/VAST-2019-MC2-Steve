@@ -1,15 +1,30 @@
 document.addEventListener('DOMContentLoaded', function() {
 
-    var toolTipDiv;
+   const FACTORY_GLYPH = "M456.723,121,328.193,248H312V121H291.3L166.084,248H152V32H32V480H480V121ZM172,432H132V392h40Zm0-80H132V312h40Zm80,80H212V392h40Zm0-80H212V312h40Zm80,80H292V392h40Zm0-80H292V312h40Zm80,80H372V392h40Zm0-80H372V312h40Z";
+   const HOSPITAL_GLYPH = "M352,104V208H160V104H88V448H238V376h38v72H424V104ZM197,394H157V354h40Zm0-92H157V262h40Zm80,0H237V262h40Zm80,92H317V354h40Zm0-92H317V262h40ZM352,104V208H160V104H88V448H238V376h38v72H424V104ZM197,394H157V354h40Zm0-92H157V262h40Zm80,0H237V262h40Zm80,92H317V354h40Zm0-92H317V262h40Z";
+   const MOBILE_SENSOR_IDX = [ 15, 22, 40,  1, 27, 30,  8, 41,  9, 37, 26, 16, 49, 13,  2, 31, 44,
+                     6, 43, 14, 11, 23, 32,  3,  5, 35, 24,  4, 34, 45, 47, 39, 19, 29,
+                     38, 12, 33, 17, 46, 10,  7, 18, 20, 50, 28, 48, 36, 25, 42, 21 ];
+
+    // Populate the mobile sensor dropdown
+    var selectpicker = d3.select(".navbar")
+                     .select(".selectpicker");
+
+
+    MOBILE_SENSOR_IDX.forEach(id => {
+      selectpicker.append("option")
+                  .text("Mobile Sensor " + id)
+                  .attr("value", id);
+    });
+
 
     // Define the div for the tooltip
+    var toolTipDiv;
     toolTipDiv = d3.select("body")
                  .append("div")
                  .attr("class", "tooltip")
                  .style("opacity", 0);
 
-    let factoryGlyph = "M456.723,121,328.193,248H312V121H291.3L166.084,248H152V32H32V480H480V121ZM172,432H132V392h40Zm0-80H132V312h40Zm80,80H212V392h40Zm0-80H212V312h40Zm80,80H292V392h40Zm0-80H292V312h40Zm80,80H372V392h40Zm0-80H372V312h40Z";
-    let hospitalGlyph = "M352,104V208H160V104H88V448H238V376h38v72H424V104ZM197,394H157V354h40Zm0-92H157V262h40Zm80,0H237V262h40Zm80,92H317V354h40Zm0-92H317V262h40ZM352,104V208H160V104H88V448H238V376h38v72H424V104ZM197,394H157V354h40Zm0-92H157V262h40Zm80,0H237V262h40Zm80,92H317V354h40Zm0-92H317V262h40Z";
     var parseTime = d3.timeParse("%Y-%m-%d %H:%M:%S");
     var alwaysSafePlantLocation = [ -119.784825, 0.162679 ];
 
@@ -87,7 +102,6 @@ document.addEventListener('DOMContentLoaded', function() {
        });
      });
 
-     //drawLineChart(lineSvg, radiationMeasurements, toolTipDiv);
      var regionFreqArray = drawBarChart(barChart, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings);
      var regionFreqDict = {};
      regionFreqArray.forEach(d => { regionFreqDict[d[0].toString()] = d[1]; });
@@ -133,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function() {
      map.append("g")
         .attr("class", "nuclear-plant")
         .append("path")
-        .attr("d", factoryGlyph)
+        .attr("d", FACTORY_GLYPH)
         .attr("transform", "translate(" + mapProjection(alwaysSafePlantLocation)[0] + ", " + mapProjection(alwaysSafePlantLocation)[1] + ")scale(0.05)")
         .style("fill", "orange");
 
@@ -174,7 +188,7 @@ document.addEventListener('DOMContentLoaded', function() {
          .data(hospitalLocations)
          .enter()
          .append("path")
-         .attr("d", hospitalGlyph)
+         .attr("d", HOSPITAL_GLYPH)
          .attr("transform", d => {
            let coordinates = [ parseFloat(d.Long), parseFloat(d.Lat) ];
            return "translate(" + mapProjection(coordinates)[0] + ", " + mapProjection(coordinates)[1] + ")scale(0.04)";
@@ -199,9 +213,9 @@ document.addEventListener('DOMContentLoaded', function() {
            return mapProjection(coordinates)[1];
          })
          .attr("r", 2)
-         .style("fill", "#00d210")
+         .style("fill", "#42ff00")
          .style("opacity", 1)
-         .style("stroke", "#00d210")
+         .style("stroke", "#42ff00")
          .on("click", function(d) {
            // Clear the colours of all the line charts
            d3.selectAll(".line").attr("stroke", "black");
@@ -246,6 +260,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         })();
      }
+
+   d3.select("#mobile-sensor-id")
+    .on("change", function() {
+      d3.select(".mobile-sensors").remove().exit();
+      drawMobileSensors(map, mapProjection, mobileSensorReadings, this.value);
+   });
+
 
   } // End of drawMap function
 

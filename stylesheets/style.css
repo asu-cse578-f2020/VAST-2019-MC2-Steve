@@ -33,3 +33,11 @@ div.tooltip table {
     height: 40vh;
     overflow-y: auto;
 }
+.dropdown-menu{
+    height:250px;
+    overflow-y:auto;
+    border-radius: 6px;
+}
+.btn {
+  color: white !important;
+}

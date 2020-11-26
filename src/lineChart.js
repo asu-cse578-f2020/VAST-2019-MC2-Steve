@@ -21,7 +21,7 @@ function drawLineChart(lineSvg, radiationMeasurements, keys, toolTipDiv) {
         .attr("transform", "translate(40," + ((lineInnerHeight) * (i + 1))/1 + ")")
         .attr("text-anchor", "middle")
         .text("Static Sensor " + key.toString())
-        .style("font", "10px sans-serif")
+        .style("font", "12px sans-serif")
         .style("fill", "gray");
 
 
