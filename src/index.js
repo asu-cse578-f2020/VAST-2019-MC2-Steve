@@ -1,27 +1,35 @@
 document.addEventListener('DOMContentLoaded', function() {
 
+    var toolTipDiv;
+
+    // Define the div for the tooltip
+    toolTipDiv = d3.select("body")
+                 .append("div")
+                 .attr("class", "tooltip")
+                 .style("opacity", 0);
+
     let factoryGlyph = "M456.723,121,328.193,248H312V121H291.3L166.084,248H152V32H32V480H480V121ZM172,432H132V392h40Zm0-80H132V312h40Zm80,80H212V392h40Zm0-80H212V312h40Zm80,80H292V392h40Zm0-80H292V312h40Zm80,80H372V392h40Zm0-80H372V312h40Z";
     let hospitalGlyph = "M352,104V208H160V104H88V448H238V376h38v72H424V104ZM197,394H157V354h40Zm0-92H157V262h40Zm80,0H237V262h40Zm80,92H317V354h40Zm0-92H317V262h40ZM352,104V208H160V104H88V448H238V376h38v72H424V104ZM197,394H157V354h40Zm0-92H157V262h40Zm80,0H237V262h40Zm80,92H317V354h40Zm0-92H317V262h40Z";
-
+    var parseTime = d3.timeParse("%Y-%m-%d %H:%M:%S");
     var alwaysSafePlantLocation = [ -119.784825, 0.162679 ];
 
     var lineSvg = d3.select(".staticSensorLineChart")
-                    .attr("width", 1264)
-                    .attr("height", 750);
+                    .attr("width", 1120)
+                    .attr("height", 850);
 
     var map = d3.select(".map")
-                .attr("width", 1264)
+                .attr("width", 600)
                 .attr("height", 550);
 
     var barChart = d3.select(".barChart")
-                .attr("width", 1264)
-                .attr("height", 750);
+                .attr("width", 610)
+                .attr("height", 550);
 
     // Setting projection parameters
     var mapProjection = d3.geoMercator()
-                          .scale(135000)
+                          .scale(120000)
                           .center([ -119.88075, 0.125 ])
-                          .translate([ 500, 250 ]);
+                          .translate([ 220, 250 ]);
 
     var geoPath = d3.geoPath().projection(mapProjection);
 
@@ -69,21 +77,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
       }); */
 
-      // Radiation Measurements for each static sensor
+     // Radiation Measurements for each static sensor
+
      radiationMeasurements = {};
      staticSensorLocations.forEach(d => {
        let sensorID = d["Sensor-id"];
-       radiationMeasurements[sensorID] = [];
+
+       radiationMeasurements[sensorID] = {
+         "readings": [],
+         "timestamps": []
+       };
+
+       // Get data for the current sensor
        let curr = staticSensorReadings.filter(x => {
          return x["Sensor-id"] == sensorID;
        });
 
        curr.forEach( x => {
-         radiationMeasurements[sensorID].push(parseFloat(x.Value));
+         radiationMeasurements[sensorID]["readings"].push(parseFloat(x.Value));
+         radiationMeasurements[sensorID]["timestamps"].push(parseTime(x.Timestamp));
        });
      });
 
-     drawLineChart(lineSvg, radiationMeasurements);
+     //drawLineChart(lineSvg, radiationMeasurements, toolTipDiv);
      var regionFreqArray = drawBarChart(barChart, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings);
      var regionFreqDict = {};
      regionFreqArray.forEach(d => { regionFreqDict[d[0].toString()] = d[1]; });
@@ -91,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
      /**
      Color scale for the choropleth map.
-    Based on the number of sensor readings per region. **/
+     Based on the number of sensor readings per region. **/
 
      var geoMapColorScale = d3.scaleLog()
                               .domain([ 2000, 7994 ])
@@ -112,6 +128,13 @@ document.addEventListener('DOMContentLoaded', function() {
                    })
                    .on("mouseout", function(d) {
                      d3.select(this).style("stroke", "white").style("stroke-width", 1);
+                   })
+                   .on("click", function(d) {
+                      $("#sensorReadingsModal").modal("toggle");
+                      d3.select("#sensorReadingsModal").select(".modal-title").text(d.properties.Name);
+                      //var modal_body = d3.select("#sensorReadingsModal").select(".modal-body");
+                      //var modal_svg = modal_body.append("svg");
+                      drawLineChart(lineSvg, radiationMeasurements, toolTipDiv);
                    });
 
 
@@ -120,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .attr("class", "nuclear-plant")
         .append("path")
         .attr("d", factoryGlyph)
-        .attr("transform", "translate(" + mapProjection(alwaysSafePlantLocation)[0] + ", " + mapProjection(alwaysSafePlantLocation)[1] + ")scale(0.04)")
+        .attr("transform", "translate(" + mapProjection(alwaysSafePlantLocation)[0] + ", " + mapProjection(alwaysSafePlantLocation)[1] + ")scale(0.05)")
         .style("fill", "orange");
 
 
@@ -150,7 +173,7 @@ document.addEventListener('DOMContentLoaded', function() {
          })
          .attr("text-anchor","middle")
          .attr("fill", "black")
-         .style("font-size", "12px");
+         .style("font-size", "10px");
 
 
       // Hospitals
@@ -194,7 +217,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
            // Highlight the corresponding line chart
            let line = d3.select(".static-sensor-curve-" + d["Sensor-id"]);
-           line.select("path").attr("stroke", "orange");
+           line.select(".line").attr("stroke", "orange");
 
          });
 
@@ -217,12 +240,12 @@ document.addEventListener('DOMContentLoaded', function() {
             .duration(100)
             .attr("stroke-width", 0)
             .attr('stroke-opacity', 0.5)
-            .style("fill", d => { if (radiationMeasurements[d["Sensor-id"]][i] > 15) return "red"; else return "#00d210"; })
-            .style("stroke", d => { if (radiationMeasurements[d["Sensor-id"]][i] > 15) return "red"; else return "#00d210"; })
-            .attr("r", d => { if (radiationMeasurements[d["Sensor-id"]][i] > 15) return 10; else return 2; })
+            .style("fill", d => { if (radiationMeasurements[d["Sensor-id"]]["readings"][i] > 15) return "red"; else return "#00d210"; })
+            .style("stroke", d => { if (radiationMeasurements[d["Sensor-id"]]["readings"][i] > 15) return "red"; else return "#00d210"; })
+            .attr("r", d => { if (radiationMeasurements[d["Sensor-id"]]["readings"][i] > 15) return 10; else return 2; })
             .transition()
             .duration(1000)
-            .attr("stroke-width", d => { return radiationMeasurements[d["Sensor-id"]][i] + 70; })
+            .attr("stroke-width", d => { return radiationMeasurements[d["Sensor-id"]]["readings"][i] + 70; })
             .attr('stroke-opacity', 0)
             .ease(d3.easeSin)
             .on("end", repeat);

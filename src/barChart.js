@@ -6,9 +6,9 @@ const CO_ORDINATES = "Co-ordinates";
 function drawBarChart(barChartSVG, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings)
 {
 
-    const margin = {top: 50, right: 50, bottom: 50, left: 50};
+    const margin = {top: 50, right: 10, bottom: 50, left: 40};
     const height = 500 - margin.top - margin.bottom;
-    const width = 800 - margin.left - margin.right;
+    const width = 600 - margin.left - margin.right;
 
     let regionMap = new Map();
     let staticSensorLocationMap = new Map();
@@ -68,7 +68,7 @@ function drawBarChart(barChartSVG, geoData, staticSensorLocations, staticSensorR
           .call(d3.axisLeft(yScale));
 
     let regionFreqArray = Array.from(regionMap, ([name, value]) => ([name, value]));
-
+    
     g.selectAll("myline")
         .data(regionFreqArray)
         .enter()
@@ -85,14 +85,15 @@ function drawBarChart(barChartSVG, geoData, staticSensorLocations, staticSensorR
         .append("circle")
             .attr("cx", d => xScale(d[0]))
             .attr("cy", d => yScale(d[1]))
-            .attr("r", "6")
+            .attr("r", "10")
             .style("fill", "#69b3a2")
             .attr("stroke", "black")
+            .attr("stroke-width", 2)
             .on("mouseover", function(d) {
-              d3.select(this).attr("r", "12");
+              d3.select(this).attr("r", "15");
             })
             .on("mouseout", function(d) {
-              d3.select(this).attr("r", "6");
+              d3.select(this).attr("r", "10");
             });
 
     return regionFreqArray;
