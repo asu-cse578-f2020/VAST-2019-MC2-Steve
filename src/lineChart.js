@@ -109,6 +109,7 @@ function drawLineChart(lineSvg, radiationMeasurements, keys, toolTipDiv) {
        .on("mousemove", function(d, idx) {
            var currentTimestamp = new Date(xScale.invert(d3.mouse(this)[0])); // get the current timestamp
            var sensorReading = radiationMeasurements.get(key.toString()).get("readings")[d3.mouse(this)[0]];
+           var time = [ currentTimestamp.getHours(), currentTimestamp.getMinutes(), currentTimestamp.getSeconds() ].join(":");
 
            focus.attr("transform", "translate(" + (xScale(currentTimestamp) + 100) + "," + yScale(sensorReading) + ")");
            toolTipDiv.transition()
@@ -121,8 +122,8 @@ function drawLineChart(lineSvg, radiationMeasurements, keys, toolTipDiv) {
              left = left - 105;
            }
 
-           toolTipDiv.html("<table><tbody><tr><td class='wide'>Timestamp: </td><td>" + currentTimestamp + "</td></tr>" +
-                 "<tr><td>Radiation:</td><td>" + sensorReading + " </td></tr></tbody></table>")
+           toolTipDiv.html("<table><tbody><tr><td class='wide'>Timestamp: </td><td>" + time + "</td></tr>" +
+                 "<tr><td>Radiation:</td><td>" + sensorReading.toFixed(2) + " </td></tr></tbody></table>")
                      .style("left", left + "px")
                      .style("top", (d3.event.pageY + 5) + "px");
 
