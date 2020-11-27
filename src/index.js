@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
       });
 
 
-      //   12, 15, 13, 11, 6, 1, 9, 14, 4
+      // 12, 15, 13, 11, 6, 1, 9, 14, 4
      sensorProximity("12", sensorProximitySVG, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings);
 
       // Radiation Measurements for each static sensor
