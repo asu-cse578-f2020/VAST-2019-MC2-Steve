@@ -11,8 +11,8 @@ function sensorProximity(staticSensorId, sensorProximitySVG, geoData, staticSens
     // const margin = {top: 50, right: 50, bottom: 50, left: 50};
     // const height = 500 - margin.top - margin.bottom;
     // const width = 800 - margin.left - margin.right;
+    console.log("asdf");
 
-    
     let g = sensorProximitySVG.append("g")
                       .attr("class", "prox-static-sensor-curve");
     lineMargin = { top: 20, right: 10, bottom: 20, left: 10 };
@@ -37,20 +37,14 @@ function sensorProximity(staticSensorId, sensorProximitySVG, geoData, staticSens
         }
     })
 
-
-
     var sumstat = d3.nest()
         .key(function(d) { return d[SENSOR_ID];})
         .entries(sensorData.get(staticSensorId));
-
-    
 
     console.log(sensorData);
     console.log(sumstat)
 
     staticSensorReadings = staticSensorReadings.filter(e => e[SENSOR_ID]===staticSensorId);
-
-
 
     drawAxis(sensorProximitySVG);
     drawBaseLine(g, staticSensorReadings);
@@ -159,20 +153,20 @@ function drawBaseLine(g, staticSensorReadings)
 
 function getDistanceFromLatLonInKm(point1,point2) {
 
-    let lat1 = point1[1], lon1 = point1[0], lat2 = point2[1],lon2 = point2[0]; 
+    let lat1 = point1[1], lon1 = point1[0], lat2 = point2[1],lon2 = point2[0];
     var R = 6371; // Radius of the earth in km
     var dLat = deg2rad(lat2-lat1);  // deg2rad below
-    var dLon = deg2rad(lon2-lon1); 
-    var a = 
+    var dLon = deg2rad(lon2-lon1);
+    var a =
       Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
       Math.sin(dLon/2) * Math.sin(dLon/2)
-      ; 
-    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+      ;
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     var d = R * c; // Distance in km
     return d;
   }
-  
+
   function deg2rad(deg) {
     return deg * (Math.PI/180)
   }

@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 .attr("width", 1264)
                 .attr("height", 750);
 
-    
+
     // Setting projection parameters
     var mapProjection = d3.geoMercator()
                           .scale(120000)
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     //   12, 15, 13, 11, 6, 1, 9, 14, 4
-    
+
       sensorProximity("12", sensorProximitySVG, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings);
 
       // Radiation Measurements for each static sensor
@@ -148,9 +148,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
                       // Remove all the child nodes of lineSvg
                       d3.select(".staticSensorLineChart").selectAll("g").remove();
-                      let keys = hashmap.get(d.properties.Id);
-                      if (keys.length > 0)
+                      if (hashmap.has(d.properties.Id)) {
+                        let keys = hashmap.get(d.properties.Id);
                         drawLineChart(lineSvg, radiationMeasurements, keys, toolTipDiv);
+                      }
+                      
                    });
 
 
