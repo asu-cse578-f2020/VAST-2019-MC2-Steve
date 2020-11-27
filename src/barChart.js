@@ -2,6 +2,10 @@ const SENSOR_ID = "Sensor-id";
 const LAT = "Lat";
 const LONG = "Long";
 const CO_ORDINATES = "Co-ordinates";
+const PETAL_PATH = "M0 0 C50 40 50 70 20 100 L0 85 L-20 100 C-50 70 -50 40 0 0";
+const LEAF_PATH = "M0 15 C15 40 15 60 0 75 C-15 60 -15 40 0 15";
+var xScaleBar;
+var yScaleBarBar;
 
 function drawBarChart(barChartSVG, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings)
 {
@@ -53,44 +57,54 @@ function drawBarChart(barChartSVG, geoData, staticSensorLocations, staticSensorR
     let g = barChartSVG.append("g")
                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    var xScale = d3.scaleBand()
+    xScaleBar = d3.scaleBand()
         .range([ 0, width ])
         .domain([...regionMap.keys()])
         .padding(1);
 
     g.append("g")
         .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(xScale))
+        .call(d3.axisBottom(xScaleBar))
         .selectAll("text")
           .attr("transform", "translate(-10,0)rotate(-45)")
           .style("text-anchor", "end");
 
-    var yScale = d3.scaleLinear()
+    yScaleBar = d3.scaleLinear()
           .domain([ 0, 10000 ])
           .range([ height, 0 ]);
     g.append("g")
-          .call(d3.axisLeft(yScale));
+          .call(d3.axisLeft(yScaleBar));
 
     let regionFreqArray = Array.from(regionMap, ([name, value]) => ([name, value]));
-    
-    g.selectAll("myline")
+
+    g.append("g")
+     .attr("class", "radiation-lines")
+        .selectAll("myline")
         .data(regionFreqArray)
         .enter()
         .append("line")
-            .attr("x1", d => xScale(d[0]))
-            .attr("x2", d => xScale(d[0]))
-            .attr("y1", d => yScale(d[1]))
-            .attr("y2", yScale(0))
-            .attr("stroke", "gray")
+            .attr("id", d => { return "radiation-line-" + d[0].split(" ").join("-"); })
+            .attr("x1", d => xScaleBar(d[0]))
+            .attr("x2", d => xScaleBar(d[0]))
+            .attr("y1", yScaleBar(0))
+            .attr("y2", yScaleBar(0))
+            .attr("stroke", "black")
+            .transition()
+                .duration(700)
+                .attr("y1", function(d) { return yScaleBar(d[1]); });
 
-    g.selectAll("mycircle")
-        .data(regionFreqArray)
-        .enter()
-        .append("circle")
-            .attr("cx", d => xScale(d[0]))
-            .attr("cy", d => yScale(d[1]))
-            .attr("r", "10")
-            .style("fill", "#69b3a2")
+    /*
+    let c = "#69b3a2";
+    g.append("g")
+     .attr("class", "radiation-circles")
+     .selectAll("mycircle")
+     .data(regionFreqArray)
+     .enter()
+     .append("circle")
+            .attr("cx", d => xScaleBar(d[0]))
+            .attr("cy", d => yScaleBar(1))
+            .attr("r", "0")
+            .style("fill", "none")
             .attr("stroke", "black")
             .attr("stroke-width", 2)
             .on("mouseover", function(d) {
@@ -98,7 +112,47 @@ function drawBarChart(barChartSVG, geoData, staticSensorLocations, staticSensorR
             })
             .on("mouseout", function(d) {
               d3.select(this).attr("r", "10");
-            });
+            })
+            .transition()
+                .duration(750)
+                .attr("cx", d => xScaleBar(d[0]) )
+                .attr("cy", d => yScaleBar(d[1]) )
+                .attr("r", "10");
+    */
+
+    g.append("g")
+     .attr("class", "static-reading-petals")
+     .selectAll("g.radiationPetals")
+     .data(regionFreqArray)
+     .enter()
+     .append("path")
+     .classed("radiationPetals", true)
+     .attr("id", d => { return "static-radiation-petal-" + d[0].split(" ").join("-"); })
+     .attr("d", LEAF_PATH)
+     .attr("fill", "#4AB56D")
+     .attr("stroke", "black")
+     .style("stroke-width", 4.5)
+     .attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(0)] + ")scale(0)rotate(324)"; })
+     .transition()
+         .duration(1000)
+         .attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(d[1])] + ")scale(0.3)rotate(144)"; });
+
+   g.append("g")
+    .attr("class", "mobile-reading-petals")
+    .selectAll("g.radiationPetals")
+    .data(regionFreqArray)
+    .enter()
+    .append("path")
+    .classed("radiationPetals", true)
+    .attr("id", d => { return "mobile-radiation-petal-" + d[0].split(" ").join("-"); })
+    .attr("d", LEAF_PATH)
+    .attr("fill", "#C70B0B")
+    .attr("stroke", "black")
+    .style("stroke-width", 4.5)
+    .attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(0)] + ")scale(0)rotate(-36)"; })
+    .transition()
+        .duration(1000)
+        .attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(d[1])] + ")scale(0.3)rotate(216)"; });
 
     return regionFreqArray;
 }
@@ -106,4 +160,43 @@ function drawBarChart(barChartSVG, geoData, staticSensorLocations, staticSensorR
 function getNameFromGeoData(data)
 {
   return data.properties.Name;
+}
+
+function transitionLine(regionName) {
+
+  // Toggle innovative view
+  regionName = regionName.split(" ").join("-")
+  let staticPetalID = "#static-radiation-petal-" + regionName;
+  let mobilePetalID = "#mobile-radiation-petal-" + regionName;
+  let radiationLine = "#radiation-line-" + regionName;
+
+  d3.select(".radiation-lines").selectAll("line").attr("stroke-width", 0.15);
+  d3.select(".static-reading-petals").selectAll("path").style("opacity", 0.15).attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(d[1])] + ")scale(0.3)rotate(144)"; });;
+  d3.select(".mobile-reading-petals").selectAll("path").style("opacity", 0.15).attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(d[1])] + ")scale(0.3)rotate(216)"; });;
+
+  d3.select(radiationLine)
+    .attr("x1", d => xScaleBar(d[0]))
+    .attr("x2", d => xScaleBar(d[0]))
+    .attr("y1", yScaleBar(0))
+    .attr("y2", yScaleBar(0))
+    .attr("stroke", "black")
+    .transition()
+      .duration(700)
+      .attr("y1", function(d) { return yScaleBar(d[1]); })
+      .attr("stroke-width", 2);
+
+  d3.select(staticPetalID)
+    .attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(0)] + ")scale(0)rotate(384)"; })
+    .transition()
+      .duration(700)
+      .attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(d[1])] + ")scale(0.6)rotate(144)"; })
+      .style("opacity", 1);
+
+  d3.select(mobilePetalID)
+    .attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(0)] + ")scale(0)rotate(-196)"; })
+    .transition()
+      .duration(700)
+      .attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(d[1])] + ")scale(0.6)rotate(216)"; })
+      .style("opacity", 1);
+
 }

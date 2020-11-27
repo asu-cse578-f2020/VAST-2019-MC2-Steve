@@ -140,11 +140,13 @@ document.addEventListener('DOMContentLoaded', function() {
                    .style("stroke", "white")
                    .on("mouseover", function(d) {
                      d3.select(this).style("stroke", "white").style("stroke-width", 10);
+
                    })
                    .on("mouseout", function(d) {
                      d3.select(this).style("stroke", "white").style("stroke-width", 1);
                    })
                    .on("click", function(d) {
+                      /*
                       $("#sensorReadingsModal").modal("toggle");
                       d3.select("#sensorReadingsModal").select(".modal-title").text(d.properties.Name);
 
@@ -154,6 +156,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         let keys = hashmap.get(d.properties.Id);
                         drawLineChart(lineSvg, radiationMeasurements, keys, toolTipDiv);
                       }
+                      */
+                      transitionLine(d.properties.Name);
 
                    });
 
