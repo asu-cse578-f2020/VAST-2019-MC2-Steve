@@ -6,6 +6,10 @@ const CO_ORDINATES = "Co-ordinates";
 function drawBarChart(barChartSVG, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings)
 {
 
+    // <script src="https://d3js.org/d3-color.v2.min.js"></script>
+    // <script src="https://d3js.org/d3-interpolate.v2.min.js"></script>
+    // <script src="https://d3js.org/d3-scale-chromatic.v2.min.js"></script>
+
     const margin = {top: 50, right: 10, bottom: 50, left: 40};
     const height = 500 - margin.top - margin.bottom;
     const width = 600 - margin.left - margin.right;

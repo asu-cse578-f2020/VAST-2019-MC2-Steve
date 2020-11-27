@@ -40,6 +40,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 .attr("width", 610)
                 .attr("height", 550);
 
+
+    var sensorProximitySVG = d3.select(".sensorProximity")
+                .attr("width", 1264)
+                .attr("height", 750);
+
+    
     // Setting projection parameters
     var mapProjection = d3.geoMercator()
                           .scale(120000)
@@ -81,7 +87,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       });
 
-     // Radiation Measurements for each static sensor
+
+    //   12, 15, 13, 11, 6, 1, 9, 14, 4
+    
+      sensorProximity("12", sensorProximitySVG, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings);
+
+      // Radiation Measurements for each static sensor
      radiationMeasurements = {};
      staticSensorLocations.forEach(d => {
        let sensorID = d["Sensor-id"];
