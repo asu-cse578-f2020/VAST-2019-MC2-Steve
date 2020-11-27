@@ -6,12 +6,12 @@ const START_TIME = "2020-04-06 00:00:00";
 const END_TIME = "2020-04-10 23:54:00";
 
 var lineMargin, lineWidth, lineHeight, lineInnerWidth, lineInnerHeight, timeXScale, yScale;
+
 function sensorProximity(staticSensorId, sensorProximitySVG, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings)
 {
     // const margin = {top: 50, right: 50, bottom: 50, left: 50};
     // const height = 500 - margin.top - margin.bottom;
     // const width = 800 - margin.left - margin.right;
-    console.log("asdf");
 
     let g = sensorProximitySVG.append("g")
                       .attr("class", "prox-static-sensor-curve");
@@ -41,8 +41,6 @@ function sensorProximity(staticSensorId, sensorProximitySVG, geoData, staticSens
         .key(function(d) { return d[SENSOR_ID];})
         .entries(sensorData.get(staticSensorId));
 
-    console.log(sensorData);
-    console.log(sumstat)
 
     staticSensorReadings = staticSensorReadings.filter(e => e[SENSOR_ID]===staticSensorId);
 
