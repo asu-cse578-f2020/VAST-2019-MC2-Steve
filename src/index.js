@@ -29,8 +29,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var alwaysSafePlantLocation = [ -119.784825, 0.162679 ];
 
     var lineSvg = d3.select(".staticSensorLineChart")
-                    .attr("width", 1120)
-                    .attr("height", 850);
+                    .attr("width", 1110)
+                    .attr("height", 550);
 
     var map = d3.select(".map")
                 .attr("width", 600)
@@ -96,14 +96,13 @@ document.addEventListener('DOMContentLoaded', function() {
      sensorProximity("12", sensorProximitySVG, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings);
 
       // Radiation Measurements for each static sensor
-     radiationMeasurements = {};
+     radiationMeasurements = new Map();
      staticSensorLocations.forEach(d => {
        let sensorID = d["Sensor-id"];
-
-       radiationMeasurements[sensorID] = {
-         "readings": [],
-         "timestamps": []
-       };
+       let tempMap = new Map();
+       tempMap.set("readings", []);
+       tempMap.set("timestamps", []);
+       radiationMeasurements.set(sensorID, tempMap);
 
        // Get data for the current sensor
        let curr = staticSensorReadings.filter(x => {
@@ -111,8 +110,8 @@ document.addEventListener('DOMContentLoaded', function() {
        });
 
        curr.forEach( x => {
-         radiationMeasurements[sensorID]["readings"].push(parseFloat(x.Value));
-         radiationMeasurements[sensorID]["timestamps"].push(parseTime(x.Timestamp));
+         radiationMeasurements.get(sensorID).get("readings").push(parseFloat(x.Value));
+         radiationMeasurements.get(sensorID).get("timestamps").push(x.Timestamp);
        });
      });
 
@@ -234,11 +233,11 @@ document.addEventListener('DOMContentLoaded', function() {
          .style("stroke", "#42ff00")
          .on("click", function(d) {
            // Clear the colours of all the line charts
-           d3.selectAll(".line").attr("stroke", "black");
+           //d3.selectAll(".line").attr("stroke", "black");
 
            // Highlight the corresponding line chart
-           let line = d3.select(".static-sensor-curve-" + d["Sensor-id"]);
-           line.select(".line").attr("stroke", "orange");
+           //let line = d3.select(".static-sensor-curve-" + d["Sensor-id"]);
+           //line.select(".line").attr("stroke", "orange");
 
          });
 
@@ -261,12 +260,12 @@ document.addEventListener('DOMContentLoaded', function() {
             .duration(100)
             .attr("stroke-width", 0)
             .attr('stroke-opacity', 0.5)
-            .style("fill", d => { if (radiationMeasurements[d["Sensor-id"]]["readings"][i] > 15) return "red"; else return "#00d210"; })
-            .style("stroke", d => { if (radiationMeasurements[d["Sensor-id"]]["readings"][i] > 15) return "red"; else return "#00d210"; })
-            .attr("r", d => { if (radiationMeasurements[d["Sensor-id"]]["readings"][i] > 15) return 10; else return 2; })
+            .style("fill", d => { if (radiationMeasurements.get(d["Sensor-id"]).get("readings")[i] > 15) return "red"; else return "#00d210"; })
+            .style("stroke", d => { if (radiationMeasurements.get(d["Sensor-id"]).get("readings")[i] > 15) return "red"; else return "#00d210"; })
+            .attr("r", d => { if (radiationMeasurements.get(d["Sensor-id"]).get("readings")[i] > 15) return 10; else return 2; })
             .transition()
             .duration(1000)
-            .attr("stroke-width", d => { return radiationMeasurements[d["Sensor-id"]]["readings"][i] + 70; })
+            .attr("stroke-width", d => { return radiationMeasurements.get(d["Sensor-id"]).get("readings")[i] + 70; })
             .attr('stroke-opacity', 0)
             .ease(d3.easeSin)
             .on("end", repeat);
@@ -346,6 +345,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     .call(chart);
             });
         });
-    }
+    }  // end of drawCircularHeat function
 
 });
