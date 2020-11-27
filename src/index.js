@@ -40,6 +40,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 .attr("width", 610)
                 .attr("height", 550);
 
+    var heat = d3.select(".heat")
+        .attr("width", 1264)
+        .attr("height", 1100);
+
 
     var sensorProximitySVG = d3.select(".sensorProximity")
                 .attr("width", 1264)
@@ -271,9 +275,11 @@ document.addEventListener('DOMContentLoaded', function() {
             i += 1;
 
         })();
-     }
+    }
 
-   d3.select("#mobile-sensor-id")
+    drawCircularHeat();
+
+    d3.select("#mobile-sensor-id")
     .on("change", function() {
       d3.select(".mobile-sensors").remove().exit();
       drawMobileSensors(map, mapProjection, mobileSensorReadings, this.value);
@@ -282,5 +288,64 @@ document.addEventListener('DOMContentLoaded', function() {
 
   } // End of drawMap function
 
+  function drawCircularHeat() {
+        d3.csv('data/MobileSensorReadingsAggregate.csv', function(mobileData) {
+            d3.csv('data/StaticSensorReadingsAggregate.csv', function(staticData) {
+                /* Label data */
+                var days = ['6th April 2020', '7th April 2020', '8th April 2020', '9th April 2020', '10th April 2020'];
+                var dayData = [];
+                var total = 0;
+                var ctr = 0;
+                var currentHour = mobileData[0]['Timestamp'].split(" ")[1].split(":")[0];
+                for (var i = 0; i < mobileData.length; i++) {
+                    if (currentHour != mobileData[i]['Timestamp'].split(" ")[1].split(":")[0]) {
+                        dayData.push(total / ctr);
+                        currentHour = mobileData[i]['Timestamp'].split(" ")[1].split(":")[0];
+                        ctr = 1;
+                        total = parseFloat(mobileData[i]['Value']);
+                    } else {
+                        total += parseFloat(mobileData[i]['Value']);
+                        ctr += 1;
+                    }
+                }
+                while (dayData.length < 120)
+                    dayData.push(0)
+
+                var total = 0;
+                var index = 0;
+                var ctr = 0;
+                var currentHour = staticData[0]['Timestamp'].split(" ")[1].split(":")[0];
+                for (var i = 0; i < staticData.length; i++) {
+                    if (currentHour != staticData[i]['Timestamp'].split(" ")[1].split(":")[0]) {
+                        var temp = dayData[index];
+                        temp += (total / ctr);
+                        dayData[index] = temp;
+                        index++;
+                        currentHour = staticData[i]['Timestamp'].split(" ")[1].split(":")[0];
+                        ctr = 1;
+                        total = parseFloat(staticData[i]['Value']);
+                    } else {
+                        total += parseFloat(staticData[i]['Value']);
+                        ctr += 1;
+                    }
+                }
+
+                /* Create the chart */
+                var chart = circularHeatChart()
+                    .segmentHeight(20)
+                    .innerRadius(20)
+                    .numSegments(5)
+                    .range(['white', 'blue'])
+                    .segmentLabels(days)
+                    .radialLabels(["Midnight", "1am", "2am", "3am", "4am", "5am", "6am", "7am", "8am", "9am", "10am", "11am", "Midday", "1pm", "2pm", "3pm", "4pm", "5pm", "6pm", "7pm", "8pm", "9pm", "10pm", "11pm"]);
+
+                heat.selectAll('svg')
+                    .data([dayData])
+                    .enter()
+                    .append('svg')
+                    .call(chart);
+            });
+        });
+    }
 
 });
