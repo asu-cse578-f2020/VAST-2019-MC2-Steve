@@ -9,6 +9,7 @@ var lineMargin, lineWidth, lineHeight, lineInnerWidth, lineInnerHeight, timeXSca
 
 function sensorProximity(staticSensorId, sensorProximitySVG, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings)
 {
+    d3.selectAll(".proximity-line-and-dots").remove();
     // const margin = {top: 50, right: 50, bottom: 50, left: 50};
     // const height = 500 - margin.top - margin.bottom;
     // const width = 800 - margin.left - margin.right;
@@ -48,7 +49,7 @@ function sensorProximity(staticSensorId, sensorProximitySVG, geoData, staticSens
     drawBaseLine(g, staticSensorReadings);
     drawVariableLines(g, sumstat);
 
-    // d3.selectAll(".proximity-line-and-dots").remove();
+    
 
 }
 
