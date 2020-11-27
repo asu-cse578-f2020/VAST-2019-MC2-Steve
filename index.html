@@ -1,89 +1,25 @@
 <!DOCTYPE html>
 <html>
-  <head>
+
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- Bootstrap CSS -->
     <link rel='stylesheet' href='stylesheets/style.css'>
-
-    
-	  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
-    <!-- Required for Bootstrap selectpicker -->
-	  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.12/dist/css/bootstrap-select.min.css">
-    <script src="https://d3js.org/d3.v4.min.js" charset="utf-8"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.24.0/d3-legend.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-
-    <!-- Required for Bootstrap selectpicker -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.12/dist/js/bootstrap-select.min.js"></script>
-    
-    <script src="https://d3js.org/d3-color.v2.min.js"></script>
-    <script src="https://d3js.org/d3-interpolate.v2.min.js"></script>
-    <script src="https://d3js.org/d3-scale-chromatic.v2.min.js"></script>
     <title>VAST 2019 MC-2</title>
-  </head>
+</head>
 
-
-  <body>
-
-    <!-- Modal for visualizing sensor readings on region click -->
-    <div class="modal fade" id="sensorReadingsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered" role="document" style="max-width:90%;">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLongTitle"></h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <svg class="staticSensorLineChart"></svg>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-dark btn-sm" data-dismiss="modal">Close</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
-      <a class="navbar-brand" href="#">VAST-2019 &nbsp; MC-2</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <select class="selectpicker dropdown show-tick" data-live-search="true" title="Mobile Sensors" data-style="btn-sm btn-primary" data-width="fit" data-size="4" id="mobile-sensor-id" name="mobile-sensor-picker">
-        </select>
-      </div>
-    </nav>
-
-
-    <!-- Grid for choropleth and pipe chart -->
-    <div class="container-fluid" style="width:100%;">
-      <div class="row no-gutters">
-        <div class="col-sm">
-          <svg class="map"></svg>
-        </div>
-        <div class="col-sm">
-          <svg class="barChart"></svg>
-        </div>
-      </div>
-    </div>
-
-    <hr/>
-    <svg class="sensorProximity"></svg>
-
-  </body>
-
-  <script src="src/sensorProximity.js"></script>
-  <script src="src/lineChart.js"></script>
-  <script src="src/barChart.js"></script>
-  <script src="src/mobileSensorTrajectories.js"></script>
-  <script src="src/index.js"></script>
+<body>
+    <div class="center" id="center-div"></div>
+    <svg class="map"></svg>
+    <hr></hr>
+    <svg class="staticSensorLineChart"></svg>
+    <hr></hr>
+    <svg class="heat"></svg>
+</body>
+<script src="src/lineChart.js"></script>
+<script src="src/index.js"></script>
+<script src="src/circularHeatChart.js"></script>
 
 </html>
