@@ -155,8 +155,8 @@ document.addEventListener('DOMContentLoaded', function() {
                       if (hashmap.has(d.properties.Id)) {
                         let keys = hashmap.get(d.properties.Id);
                         drawLineChart(lineSvg, radiationMeasurements, keys, toolTipDiv);
-                      }
-                      */
+                      } */
+
                       transitionLine(d.properties.Name);
 
                    });
