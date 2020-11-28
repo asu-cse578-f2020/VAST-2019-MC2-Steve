@@ -5,7 +5,8 @@ function drawLineChart(lineSvg, radiationMeasurements, keys, toolTipDiv) {
   var lineHeight = 120;
   var lineInnerWidth = lineWidth - lineMargin.left - lineMargin.right - 30;
   var lineInnerHeight = lineHeight - lineMargin.top - lineMargin.bottom;
-  //var parseTime = d3.timeParse("%Y-%m-%d %H:%M:%S");
+
+  lineSvg.attr("height", lineHeight * keys.length);
 
    // Draw multiple line charts
    keys.forEach(function(key, i) {
@@ -60,7 +61,6 @@ function drawLineChart(lineSvg, radiationMeasurements, keys, toolTipDiv) {
         if (j%2 == 1) d3.select(this).remove();
       });
 
-
      var path = g.append("path")
                  .attr("class", "line")
                  .attr("transform", "translate(100," + (lineInnerHeight * i) + ")")
@@ -78,7 +78,7 @@ function drawLineChart(lineSvg, radiationMeasurements, keys, toolTipDiv) {
      path.attr("stroke-dasharray", totalLength + " " + totalLength)
          .attr("stroke-dashoffset", totalLength)
         .transition()
-         .duration(3000)
+         .duration(1700)
          .ease(d3.easeLinear)
          .attr("stroke-dashoffset", 0);
 

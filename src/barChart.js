@@ -90,7 +90,7 @@ function drawBarChart(barChartSVG, geoData, staticSensorLocations, staticSensorR
             .attr("y2", yScaleBar(0))
             .attr("stroke", "black")
             .transition()
-                .duration(700)
+                .duration(500)
                 .attr("y1", function(d) { return yScaleBar(d[1]); });
 
     /*
@@ -134,7 +134,7 @@ function drawBarChart(barChartSVG, geoData, staticSensorLocations, staticSensorR
      .style("stroke-width", 4.5)
      .attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(0)] + ")scale(0)rotate(324)"; })
      .transition()
-         .duration(1000)
+         .duration(700)
          .attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(d[1])] + ")scale(0.3)rotate(144)"; });
 
    g.append("g")
@@ -151,7 +151,7 @@ function drawBarChart(barChartSVG, geoData, staticSensorLocations, staticSensorR
     .style("stroke-width", 4.5)
     .attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(0)] + ")scale(0)rotate(-36)"; })
     .transition()
-        .duration(1000)
+        .duration(700)
         .attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(d[1])] + ")scale(0.3)rotate(216)"; });
 
     return regionFreqArray;

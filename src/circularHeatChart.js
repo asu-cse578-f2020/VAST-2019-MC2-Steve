@@ -1,4 +1,73 @@
+function drawCircularHeat(heat, regionID, geoData, mobileData, staticData) {
+
+  regionData = geoData.features.filter(d => {
+    return d.properties.Id == regionID;
+  });
+
+  /* Label data */
+  var days = ['6th April 2020', '7th April 2020', '8th April 2020', '9th April 2020', '10th April 2020'];
+  var dayData = [];
+  var total = 0;
+  var ctr = 0;
+  var currentHour = mobileData[0]['Timestamp'].split(" ")[1].split(":")[0];
+  for (var i = 0; i < mobileData.length; i++) {
+      if (d3.geoContains(regionData[0], [ mobileData[i]["Long"], mobileData[i]["Lat"] ])) {
+        if (currentHour != mobileData[i]['Timestamp'].split(" ")[1].split(":")[0]) {
+            dayData.push(total / ctr);
+            currentHour = mobileData[i]['Timestamp'].split(" ")[1].split(":")[0];
+            ctr = 1;
+            total = parseFloat(mobileData[i]['Value']);
+        } else {
+            total += parseFloat(mobileData[i]['Value']);
+            ctr += 1;
+        }
+      }
+  }
+
+  while (dayData.length < 120)
+      dayData.push(0)
+
+  var total = 0;
+  var index = 0;
+  var ctr = 0;
+  var currentHour = staticData[0]['Timestamp'].split(" ")[1].split(":")[0];
+  for (var i = 0; i < staticData.length; i++) {
+      if (d3.geoContains(regionData[0], [ staticData[i]["Long"], staticData[i]["Lat"] ])) {
+        if (currentHour != staticData[i]['Timestamp'].split(" ")[1].split(":")[0]) {
+            var temp = dayData[index];
+            temp += (total / ctr);
+            dayData[index] = temp;
+            index++;
+            currentHour = staticData[i]['Timestamp'].split(" ")[1].split(":")[0];
+            ctr = 1;
+            total = parseFloat(staticData[i]['Value']);
+        } else {
+            total += parseFloat(staticData[i]['Value']);
+            ctr += 1;
+        }
+    }
+  }
+
+  /* Create the chart */
+  var chart = circularHeatChart()
+      .segmentHeight(15)
+      .innerRadius(15)
+      .numSegments(5)
+      .range(['white', 'blue'])
+      .segmentLabels(days)
+      .radialLabels(["Midnight", "1am", "2am", "3am", "4am", "5am", "6am", "7am", "8am", "9am", "10am", "11am", "Midday", "1pm", "2pm", "3pm", "4pm", "5pm", "6pm", "7pm", "8pm", "9pm", "10pm", "11pm"]);
+
+  heat.selectAll('svg')
+      .data([dayData])
+      .enter()
+      .append('svg')
+      .call(chart);
+
+  }  // end of drawCircularHeat function
+
+
 function circularHeatChart() {
+
     var margin = { top: 20, right: 20, bottom: 20, left: 20 },
         innerRadius = 50,
         numSegments = 24,
