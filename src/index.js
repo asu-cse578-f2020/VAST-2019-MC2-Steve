@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
 
-   const FACTORY_GLYPH = "M456.723,121,328.193,248H312V121H291.3L166.084,248H152V32H32V480H480V121ZM172,432H132V392h40Zm0-80H132V312h40Zm80,80H212V392h40Zm0-80H212V312h40Zm80,80H292V392h40Zm0-80H292V312h40Zm80,80H372V392h40Zm0-80H372V312h40Z";
-   const HOSPITAL_GLYPH = "M352,104V208H160V104H88V448H238V376h38v72H424V104ZM197,394H157V354h40Zm0-92H157V262h40Zm80,0H237V262h40Zm80,92H317V354h40Zm0-92H317V262h40ZM352,104V208H160V104H88V448H238V376h38v72H424V104ZM197,394H157V354h40Zm0-92H157V262h40Zm80,0H237V262h40Zm80,92H317V354h40Zm0-92H317V262h40Z";
-   const MOBILE_SENSOR_IDX = [ 15, 22, 40,  1, 27, 30,  8, 41,  9, 37, 26, 16, 49, 13,  2, 31, 44,
+    const FACTORY_GLYPH = "M456.723,121,328.193,248H312V121H291.3L166.084,248H152V32H32V480H480V121ZM172,432H132V392h40Zm0-80H132V312h40Zm80,80H212V392h40Zm0-80H212V312h40Zm80,80H292V392h40Zm0-80H292V312h40Zm80,80H372V392h40Zm0-80H372V312h40Z";
+    const HOSPITAL_GLYPH = "M352,104V208H160V104H88V448H238V376h38v72H424V104ZM197,394H157V354h40Zm0-92H157V262h40Zm80,0H237V262h40Zm80,92H317V354h40Zm0-92H317V262h40ZM352,104V208H160V104H88V448H238V376h38v72H424V104ZM197,394H157V354h40Zm0-92H157V262h40Zm80,0H237V262h40Zm80,92H317V354h40Zm0-92H317V262h40Z";
+    const MOBILE_SENSOR_IDX = [ 15, 22, 40,  1, 27, 30,  8, 41,  9, 37, 26, 16, 49, 13,  2, 31, 44,
                      6, 43, 14, 11, 23, 32,  3,  5, 35, 24,  4, 34, 45, 47, 39, 19, 29,
                      38, 12, 33, 17, 46, 10,  7, 18, 20, 50, 28, 48, 36, 25, 42, 21 ];
     const STATIC_SENSOR_IDX = [12, 15, 13, 11, 6, 1, 9, 14, 4];
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .attr("height", 800);
 
     var sensorProximitySVG = d3.select(".sensorProximity")
-                .attr("width", 1264)
+                .attr("width", 1110)
                 .attr("height", 750);
 
     var mobileSensorProximitySVG = d3.select(".mobileSensorProximity")
@@ -158,8 +158,7 @@ document.addEventListener('DOMContentLoaded', function() {
      /**
      Color scale for the choropleth map.
      Based on the number of sensor readings per region. **/
-
-    var geoMapColorScale = d3.scaleLog()
+     var geoMapColorScale = d3.scaleLog()
                               .domain([ 2000, 7994 ])
                               .range([ "#c6dbef", "#6baed6", "#3182bd", "#08519c" ]);
 
@@ -259,7 +258,7 @@ document.addEventListener('DOMContentLoaded', function() {
          .style("opacity", 1)
          .style("stroke", "#42ff00")
 
-
+    drawMapLegend(map, geoMapColorScale);
     var circles = d3.select(".static-sensors").selectAll("circle");
     pulse(circles);
 
@@ -307,11 +306,13 @@ document.addEventListener('DOMContentLoaded', function() {
     .on("change", function() {
     //   d3.select(".mobile-sensors").remove().exit();
 
-    $("#sensorReadingsModal").modal("toggle");
-    // d3.select("#sensorReadingsModal").select(".modal-title").text(d.properties.Name);
+    $("#staticSensorProximityReadingsModal").modal("toggle");
+    let modal = d3.select("#staticSensorProximityReadingsModal");
+    modal.select(".modal-title").text("Static Sensor " + this.value);
+    modal.select(".modal-body").style("height", "60vh");
 
     // Remove all the child nodes of lineSvg
-    d3.select(".staticSensorLineChart").selectAll("g").remove();
+    d3.select(".sensorProximity").selectAll("g").remove();
     sensorProximity(this.value, sensorProximitySVG, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings);
 
    });
@@ -321,7 +322,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
      $("#sensorReadingsModal").modal("toggle");
      let regionID = parseInt(this.value);
-     let modal = d3.select("#sensorReadingsModal")
+     let modal = d3.select("#sensorReadingsModal");
 
      // Remove all the child nodes of lineSvg.
      d3.select(".staticSensorLineChart").selectAll("g").remove();
@@ -374,4 +375,73 @@ document.addEventListener('DOMContentLoaded', function() {
 
   }
 
+  function drawMapLegend(map, geoMapColorScale) {
+
+    map.append("svg:text")
+       .attr("transform", "translate(175, 430)")
+       .text("Always Safe Nuclear Plant")
+       .attr("text-anchor", "end")
+       .attr("fill", "black")
+       .style("font-size", "12px");
+
+    map.append("path")
+       .attr("d", FACTORY_GLYPH)
+       .attr("transform", "translate(10, 410)scale(0.05)")
+       .style("fill", "orange");
+
+    map.append("svg:text")
+       .attr("transform", "translate(80, 390)")
+       .text("Hospital")
+       .attr("text-anchor", "end")
+       .attr("fill", "black")
+       .style("font-size", "12px");
+
+    map.append("path")
+        .attr("d", HOSPITAL_GLYPH)
+        .attr("transform", "translate(10, 370)scale(0.05)")
+        .style("fill", "black");
+
+    const axis = d3.scaleLog()
+                   .domain([ 2000, 7994 ])
+                   .range([ 0, 200 ]);
+
+    const legendAxis = d3.axisBottom(axis)
+                         .ticks("7", ".1s");
+
+
+    const defs = map.append("defs");
+    const linearGradient = defs.append("linearGradient").attr("id", "linear-gradient");
+
+    linearGradient.selectAll("stop")
+                  .data(geoMapColorScale.ticks().map((t, i, n) => ({ offset: `${100*i/n.length}%`, color: geoMapColorScale(t) })))
+                  .enter().append("stop")
+                  .attr("offset", d => d.offset)
+                  .attr("stop-color", d => d.color);
+    // Legend svg
+    map.append("g")
+          .attr("class", "rect-container")
+          .attr("transform", `translate(110, 450)`)
+          .append("rect")
+          .attr("transform", `translate(-100, 0)`)
+          .attr("width", 200)
+          .attr("height", 20)
+          .style("fill", "url(#linear-gradient)");
+
+    map.append("g")
+           .attr("class", "legend-axis")
+           .attr("transform", "translate(10, 470)")
+           .call(legendAxis)
+           .style("stroke-width", 0);
+
+     map.select(".legend-axis")
+       .selectAll(".tick line")
+       .attr("stroke-opacity", 1)
+       .attr("stroke-width", 1)
+       .attr("y2", -20)
+       .style("stroke", "white");
+
+     map.select(".legend-axis")
+       .selectAll(".tick text")
+       .style("padding", "10px");
+  }
 });

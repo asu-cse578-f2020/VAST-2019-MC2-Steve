@@ -39,6 +39,25 @@
           </div>
           <div class="modal-body">
             <svg class="staticSensorLineChart"></svg>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-dark btn-sm" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for visualizing sensor readings on static sensor dropdown click -->
+    <div class="modal fade" id="staticSensorProximityReadingsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document" style="max-width:90%;">
+        <div class="modal-content">
+          <div class="modal-header">
+            <div class="modal-title" id="exampleModalLongTitle"></div>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
             <svg class="sensorProximity"></svg>
           </div>
           <div class="modal-footer">
@@ -70,6 +89,7 @@
     <!-- Grid for choropleth and pipe chart -->
     <div class="container-fluid" style="width:100%;">
       <div class="row no-gutters">
+
         <div class="col-sm">
           <div class="card" style="width: 610px; height: 600px;">
             <span class="map-header"> <h5 class="card-header">St. Himark Map</h5> </span>
@@ -79,9 +99,10 @@
           </div>
 
         </div>
+
         <div class="col-sm">
           <div class="card" style="width: 630px; height: 600px;">
-            <h5 class="card-header">Innovative View Leaf Chart</h5>
+            <span> <h5 class="card-header">Innovative View Leaf Chart &nbsp; &nbsp; <button type="button" class="btn btn-sm btn-dark" id="show-leaves" style="border-radius: 25px;">Show All </button> </h5> </span>
             <div class="card-body">
               <svg class="barChart"></svg>
             </div>
