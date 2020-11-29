@@ -65,7 +65,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 .attr("width", 1264)
                 .attr("height", 750);
 
+    var mobileSensorProximitySVG = d3.select(".mobileSensorProximity")
+                .attr("width", 1264)
+                .attr("height", 750);
 
+                
     // Setting projection parameters
     var mapProjection = d3.geoMercator()
                           .scale(120000)
@@ -299,6 +303,8 @@ document.addEventListener('DOMContentLoaded', function() {
     .on("change", function() {
       d3.select(".mobile-sensors").remove().exit();
       drawMobileSensors(map, mapProjection, mobileSensorReadings, this.value);
+      mobileSensorProximity(this.value, mobileSensorProximitySVG, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings);
+
    });
 
    d3.select("#static-sensor-id")

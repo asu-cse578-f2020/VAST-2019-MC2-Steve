@@ -37,7 +37,7 @@ function sensorProximity(staticSensorId, sensorProximitySVG, geoData, staticSens
             sensorData.set(staticSensorId, [...sensorData.get(staticSensorId), d]);
         }
     })
-
+   
     var sumstat = d3.nest()
         .key(function(d) { return d[SENSOR_ID];})
         .entries(sensorData.get(staticSensorId));
@@ -113,7 +113,7 @@ function drawVariableLines(g, sumstat)
                 .attr("transform", "translate(50," + (lineInnerHeight ) + ")")
                 .attr("class", "data-circle")
                 .attr("r", 3)
-                .style("fill", colors[i])
+                .style("fill", function(d, idx) {return colors[Number(d[SENSOR_ID])]; })
                 .attr("cx", function(d, idx) {return timeXScale(new Date(d["Timestamp"])); })
                 .attr("cy", function(d, idx) { return yScale(d["Value"]); } );
     }
