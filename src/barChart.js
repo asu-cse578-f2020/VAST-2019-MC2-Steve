@@ -24,6 +24,10 @@ function drawBarChart(barChartSVG, geoData, staticSensorLocations, staticSensorR
     const height = 500 - margin.top - margin.bottom;
     const width = 600 - margin.left - margin.right;
 
+    var divTooltip = d3.select("body").append("div")
+                .attr("class", "tooltip-donut")
+                .style("opacity", 0);
+
     regionMap = new Map();
     let staticSensorLocationMap = new Map();
 
@@ -91,6 +95,25 @@ function drawBarChart(barChartSVG, geoData, staticSensorLocations, staticSensorR
         .data(regionFreqArray)
         .enter()
         .append("line")
+            .on('mouseover', function(d, i) {
+                d3.select(this).transition()
+                    .duration('50')
+                    .attr('opacity', '.85');
+                divTooltip.transition()
+                    .duration(50)
+                    .style("opacity", 1);
+                    divTooltip.html(`${d[0]} | Static: ${d[1][STATIC]} | Mobile: ${d[1][MOBILE]}`)
+                    .style("left", (d3.event.pageX + 10) + "px")
+                    .style("top", (d3.event.pageY - 15) + "px");
+            })
+            .on('mouseout', function(d, i) {
+                d3.select(this).transition()
+                    .duration('50')
+                    .attr('opacity', '1');
+                divTooltip.transition()
+                    .duration('50')
+                    .style("opacity", 0);
+            })
             .attr("id", d => { return "radiation-line-" + d[0].split(" ").join("-"); })
             .attr("x1", d => xScaleBar(d[0]))
             .attr("x2", d => xScaleBar(d[0]))
@@ -134,6 +157,25 @@ function drawBarChart(barChartSVG, geoData, staticSensorLocations, staticSensorR
      .data(regionFreqArray)
      .enter()
      .append("path")
+     .on('mouseover', function(d, i) {
+        d3.select(this).transition()
+            .duration('50')
+            .attr('opacity', '.85');
+        divTooltip.transition()
+            .duration(50)
+            .style("opacity", 1);
+            divTooltip.html(`${d[0]} | Static: ${d[1][STATIC]} | Mobile: ${d[1][MOBILE]}`)
+            .style("left", (d3.event.pageX + 10) + "px")
+            .style("top", (d3.event.pageY - 15) + "px");
+    })
+    .on('mouseout', function(d, i) {
+        d3.select(this).transition()
+            .duration('50')
+            .attr('opacity', '1');
+        divTooltip.transition()
+            .duration('50')
+            .style("opacity", 0);
+    })
     //  .append("image")
      .classed("radiationPetals", true)
      .attr("id", d => { return "static-radiation-petal-" + d[0].split(" ").join("-"); })
@@ -154,6 +196,25 @@ function drawBarChart(barChartSVG, geoData, staticSensorLocations, staticSensorR
     .enter()
     // .append("image")
     .append("path")
+    .on('mouseover', function(d, i) {
+        d3.select(this).transition()
+            .duration('50')
+            .attr('opacity', '.85');
+        divTooltip.transition()
+            .duration(50)
+            .style("opacity", 1);
+            divTooltip.html(`${d[0]} | Static: ${d[1][STATIC]} | Mobile: ${d[1][MOBILE]}`)
+            .style("left", (d3.event.pageX + 10) + "px")
+            .style("top", (d3.event.pageY - 15) + "px");
+    })
+    .on('mouseout', function(d, i) {
+        d3.select(this).transition()
+            .duration('50')
+            .attr('opacity', '1');
+        divTooltip.transition()
+            .duration('50')
+            .style("opacity", 0);
+    })
     .classed("radiationPetals", true)
     .attr("id", d => { return "mobile-radiation-petal-" + d[0].split(" ").join("-"); })
     .attr("d", LEAF_PATH)
