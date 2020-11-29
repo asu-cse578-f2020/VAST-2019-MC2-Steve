@@ -15,12 +15,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Populate the mobile sensor dropdown
     var selectpicker = d3.select(".navbar")
                      .select(".mobile-select-picker");
+    var mobileSensorSelectPicker = d3.select(".navbar")
+                                     .select("#mobile-sensor-id");
 
 
     MOBILE_SENSOR_IDX.forEach(id => {
-      selectpicker.append("option")
-                  .text("Mobile Sensor " + id)
-                  .attr("value", id);
+      mobileSensorSelectPicker.append("option")
+                              .text("Mobile Sensor " + id)
+                              .attr("value", id);
     });
 
     var staticSelectpicker = d3.select(".navbar")
@@ -32,6 +34,8 @@ document.addEventListener('DOMContentLoaded', function() {
                   .text("Static Sensor " + id)
                   .attr("value", id);
     });
+    var regionSelectPicker = d3.select(".navbar")
+                               .select("#region-id");
 
 
     // Define the div for the tooltip
@@ -45,8 +49,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var alwaysSafePlantLocation = [ -119.784825, 0.162679 ];
 
     var lineSvg = d3.select(".staticSensorLineChart")
-                    .attr("width", 1120)
-                    .attr("height", 850);
+                    .attr("width", 1110)
+                    .attr("height", 240);
 
     var map = d3.select(".map")
                 .attr("width", 600)
@@ -57,9 +61,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 .attr("height", 550);
 
     var heat = d3.select(".heat")
-        .attr("width", 1264)
-        .attr("height", 1100);
-
+        .attr("width", 800)
+        .attr("height", 800);
 
     var sensorProximitySVG = d3.select(".sensorProximity")
                 .attr("width", 1264)
@@ -92,13 +95,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
       if (error) console.log(error);
 
+      var regionNameMappings = new Map();
+
+      geoData.features.forEach(d => {
+        let locationID = d.properties.Id;
+        let locationName = d.properties.Name;
+
+        // Populate the region select picker with region names
+        regionSelectPicker.append("option")
+                          .text(locationName)
+                          .attr("value", locationID);
+
+        regionNameMappings.set(locationID, locationName);
+      });
+
       // Hashmap for associating area ID with sensor-id { areaID: sensorID }
       var hashmap = new Map();
+
       staticSensorLocations.forEach(function(d) {
         let point = [ parseFloat(d.Long), parseFloat(d.Lat) ];
         for (var i = 0; i < geoData.features.length; i++) {
 
-          let locationID = geoData.features[i].properties["Id"];
+          let locationID = geoData.features[i].properties.Id;
 
           if (d3.geoContains(geoData.features[i], point)) {
             if (hashmap.has(locationID)) {
@@ -116,14 +134,13 @@ document.addEventListener('DOMContentLoaded', function() {
     //  sensorProximity("12", sensorProximitySVG, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings);
 
       // Radiation Measurements for each static sensor
-     radiationMeasurements = {};
+     radiationMeasurements = new Map();
      staticSensorLocations.forEach(d => {
        let sensorID = d["Sensor-id"];
-
-       radiationMeasurements[sensorID] = {
-         "readings": [],
-         "timestamps": []
-       };
+       let tempMap = new Map();
+       tempMap.set("readings", []);
+       tempMap.set("timestamps", []);
+       radiationMeasurements.set(sensorID, tempMap);
 
        // Get data for the current sensor
        let curr = staticSensorReadings.filter(x => {
@@ -131,8 +148,8 @@ document.addEventListener('DOMContentLoaded', function() {
        });
 
        curr.forEach( x => {
-         radiationMeasurements[sensorID]["readings"].push(parseFloat(x.Value));
-         radiationMeasurements[sensorID]["timestamps"].push(parseTime(x.Timestamp));
+         radiationMeasurements.get(sensorID).get("readings").push(parseFloat(x.Value));
+         radiationMeasurements.get(sensorID).get("timestamps").push(x.Timestamp);
        });
      });
 
@@ -166,16 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
                      d3.select(this).style("stroke", "white").style("stroke-width", 1);
                    })
                    .on("click", function(d) {
-                      $("#sensorReadingsModal").modal("toggle");
-                      d3.select("#sensorReadingsModal").select(".modal-title").text(d.properties.Name);
-
-                      // Remove all the child nodes of lineSvg
-                      d3.select(".staticSensorLineChart").selectAll("g").remove();
-                      if (hashmap.has(d.properties.Id)) {
-                        let keys = hashmap.get(d.properties.Id);
-                        drawLineChart(lineSvg, radiationMeasurements, keys, toolTipDiv);
-                      }
-
+                      transitionLine(d.properties.Name);
                    });
 
 
@@ -254,11 +262,11 @@ document.addEventListener('DOMContentLoaded', function() {
          .style("stroke", "#42ff00")
          .on("click", function(d) {
            // Clear the colours of all the line charts
-           d3.selectAll(".line").attr("stroke", "black");
+           //d3.selectAll(".line").attr("stroke", "black");
 
            // Highlight the corresponding line chart
-           let line = d3.select(".static-sensor-curve-" + d["Sensor-id"]);
-           line.select(".line").attr("stroke", "orange");
+           //let line = d3.select(".static-sensor-curve-" + d["Sensor-id"]);
+           //line.select(".line").attr("stroke", "orange");
 
          });
 
@@ -281,12 +289,12 @@ document.addEventListener('DOMContentLoaded', function() {
             .duration(100)
             .attr("stroke-width", 0)
             .attr('stroke-opacity', 0.5)
-            .style("fill", d => { if (radiationMeasurements[d["Sensor-id"]]["readings"][i] > 15) return "red"; else return "#00d210"; })
-            .style("stroke", d => { if (radiationMeasurements[d["Sensor-id"]]["readings"][i] > 15) return "red"; else return "#00d210"; })
-            .attr("r", d => { if (radiationMeasurements[d["Sensor-id"]]["readings"][i] > 15) return 10; else return 2; })
+            .style("fill", d => { if (radiationMeasurements.get(d["Sensor-id"]).get("readings")[i] > 15) return "red"; else return "#00d210"; })
+            .style("stroke", d => { if (radiationMeasurements.get(d["Sensor-id"]).get("readings")[i] > 15) return "red"; else return "#00d210"; })
+            .attr("r", d => { if (radiationMeasurements.get(d["Sensor-id"]).get("readings")[i] > 15) return 10; else return 2; })
             .transition()
             .duration(1000)
-            .attr("stroke-width", d => { return radiationMeasurements[d["Sensor-id"]]["readings"][i] + 70; })
+            .attr("stroke-width", d => { return radiationMeasurements.get(d["Sensor-id"]).get("readings")[i] + 70; })
             .attr('stroke-opacity', 0)
             .ease(d3.easeSin)
             .on("end", repeat);
@@ -296,8 +304,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         })();
     }
-
-    drawCircularHeat();
 
     d3.select("#mobile-sensor-id")
     .on("change", function() {
@@ -320,67 +326,57 @@ document.addEventListener('DOMContentLoaded', function() {
 
    });
 
+   d3.select("#region-id")
+   .on("change", function() {
+
+     $("#sensorReadingsModal").modal("toggle");
+     let regionID = parseInt(this.value);
+     let modal = d3.select("#sensorReadingsModal")
+
+     // Remove all the child nodes of lineSvg.
+     d3.select(".staticSensorLineChart").selectAll("g").remove();
+     if (hashmap.has(regionID)) {
+       let keys = hashmap.get(regionID);
+       drawLineChart(lineSvg, radiationMeasurements, keys, toolTipDiv);
+       let peakValues = getPeakValueTimestamp(radiationMeasurements, keys);
+       modal.select(".modal-title").html("<span style='font-size: 1.5rem; font-weight: bolder'> " + regionNameMappings.get(regionID) + " </span> &nbsp; &nbsp; &nbsp; <span class='badge badge-pill badge-dark' style='font-size: 0.9rem;'>Peak Value: " + peakValues[0] + " </span> &nbsp; &nbsp; &nbsp; <span class='badge badge-pill badge-dark' style='font-size: 0.9rem;'>Timestamp: " + peakValues[1] + "</span>");
+    }
+    else {
+      modal.select(".modal-title").html("<span style='font-size: 1.5rem; font-weight: bolder'> " + regionNameMappings.get(regionID) + " </span> &nbsp; &nbsp; &nbsp; <span style='font-size: 0.9rem;'> No static sensors exist in this region. </span>");
+    }
+
+    // Draw the circular heatmap
+    drawCircularHeat(heat, regionID, geoData, mobileSensorReadings, staticSensorReadings);
+
+  });
+
 
   } // End of drawMap function
 
-  function drawCircularHeat() {
-        d3.csv('data/MobileSensorReadingsAggregate.csv', function(mobileData) {
-            d3.csv('data/StaticSensorReadingsAggregate.csv', function(staticData) {
-                /* Label data */
-                var days = ['6th April 2020', '7th April 2020', '8th April 2020', '9th April 2020', '10th April 2020'];
-                var dayData = [];
-                var total = 0;
-                var ctr = 0;
-                var currentHour = mobileData[0]['Timestamp'].split(" ")[1].split(":")[0];
-                for (var i = 0; i < mobileData.length; i++) {
-                    if (currentHour != mobileData[i]['Timestamp'].split(" ")[1].split(":")[0]) {
-                        dayData.push(total / ctr);
-                        currentHour = mobileData[i]['Timestamp'].split(" ")[1].split(":")[0];
-                        ctr = 1;
-                        total = parseFloat(mobileData[i]['Value']);
-                    } else {
-                        total += parseFloat(mobileData[i]['Value']);
-                        ctr += 1;
-                    }
-                }
-                while (dayData.length < 120)
-                    dayData.push(0)
+  function getPeakValueTimestamp(radiationMeasurements, keys) {
 
-                var total = 0;
-                var index = 0;
-                var ctr = 0;
-                var currentHour = staticData[0]['Timestamp'].split(" ")[1].split(":")[0];
-                for (var i = 0; i < staticData.length; i++) {
-                    if (currentHour != staticData[i]['Timestamp'].split(" ")[1].split(":")[0]) {
-                        var temp = dayData[index];
-                        temp += (total / ctr);
-                        dayData[index] = temp;
-                        index++;
-                        currentHour = staticData[i]['Timestamp'].split(" ")[1].split(":")[0];
-                        ctr = 1;
-                        total = parseFloat(staticData[i]['Value']);
-                    } else {
-                        total += parseFloat(staticData[i]['Value']);
-                        ctr += 1;
-                    }
-                }
-
-                /* Create the chart */
-                var chart = circularHeatChart()
-                    .segmentHeight(20)
-                    .innerRadius(20)
-                    .numSegments(5)
-                    .range(['white', 'blue'])
-                    .segmentLabels(days)
-                    .radialLabels(["Midnight", "1am", "2am", "3am", "4am", "5am", "6am", "7am", "8am", "9am", "10am", "11am", "Midday", "1pm", "2pm", "3pm", "4pm", "5pm", "6pm", "7pm", "8pm", "9pm", "10pm", "11pm"]);
-
-                heat.selectAll('svg')
-                    .data([dayData])
-                    .enter()
-                    .append('svg')
-                    .call(chart);
-            });
-        });
+    function argMax(array) {
+        return array.map((x, i) => [x, i]).reduce((r, a) => (a[0] > r[0] ? a : r))[1];
     }
+
+    var result = [];
+
+    keys.forEach(k => {
+      result.push({
+        "val": Math.max(...radiationMeasurements.get(k).get("readings")),
+        "timestamp": radiationMeasurements.get(k).get("timestamps")[argMax(radiationMeasurements.get(k).get("readings"))]
+      });
+    });
+
+    if (result.length == 1)
+      return [ result[0]["val"], result[0]["timestamp"] ];
+    else {
+      if (result[0]["val"] >= result[1]["val"])
+        return [ result[0]["val"], result[0]["timestamp"] ];
+      else
+        return [ result[1]["val"], result[1]["timestamp"] ];
+    }
+
+  }
 
 });

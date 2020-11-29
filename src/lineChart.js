@@ -1,13 +1,12 @@
 function drawLineChart(lineSvg, radiationMeasurements, keys, toolTipDiv) {
 
   var lineMargin = { top: 10, right: 10, bottom: 20, left: 10 };
-  var lineWidth = +lineSvg.style('width').replace('px','') - 100;
+  var lineWidth = +lineSvg.style('width').replace('px','') - 90;
   var lineHeight = 120;
   var lineInnerWidth = lineWidth - lineMargin.left - lineMargin.right - 30;
   var lineInnerHeight = lineHeight - lineMargin.top - lineMargin.bottom;
-  //var keys = Object.keys(radiationMeasurements);
-  var parseTime = d3.timeParse("%Y-%m-%d %H:%M:%S");
 
+  lineSvg.attr("height", lineHeight * keys.length);
 
    // Draw multiple line charts
    keys.forEach(function(key, i) {
@@ -18,19 +17,20 @@ function drawLineChart(lineSvg, radiationMeasurements, keys, toolTipDiv) {
 
       g.append("text")
         .attr("class", "sensor-label")
-        .attr("transform", "translate(40," + ((lineInnerHeight) * (i + 1))/1 + ")")
+        .attr("transform", "translate(45," + ((lineInnerHeight) * (i + 1))/1 + ")")
         .attr("text-anchor", "middle")
         .text("Static Sensor " + key.toString())
         .style("font", "12px sans-serif")
         .style("fill", "gray");
 
-
       // X-axis
+     //var extents = d3.extent(radiationMeasurements.get(key.toString()).get("timestamps"));
+     //console.log(extents);
      const xScale = d3.scaleTime()
-                      .domain(d3.extent(radiationMeasurements[key].timestamps))
+                      .domain([new Date(START_TIME), new Date(END_TIME)])
                       .range([0, lineInnerWidth]);
      const xAxis = d3.axisBottom(xScale)
-                     .tickFormat(d3.timeFormat("%Y-%m-%d %H:%M:%S"));
+                     .ticks(d3.timeHour.every(4));
 
 
      g.append("g")
@@ -57,19 +57,19 @@ function drawLineChart(lineSvg, radiationMeasurements, keys, toolTipDiv) {
      // Remove every other x-tick label
       var ticks = d3.selectAll(".xtick-labels-" + key.toString() + " text");
       ticks.each(function(_, j) {
-        if (j%2 !== 0) d3.select(this).remove();
+        if (j%6 == 0) d3.select(this).style("fill", "black").style("font-weight", "bold").style("font-size", "12px");
+        if (j%2 == 1) d3.select(this).remove();
       });
-
 
      var path = g.append("path")
                  .attr("class", "line")
                  .attr("transform", "translate(100," + (lineInnerHeight * i) + ")")
-                 .datum(radiationMeasurements[key.toString()].readings)
+                 .datum(radiationMeasurements.get(key.toString()).get("readings"))
                  .attr("fill", "none")
                  .attr("stroke", "black")
                  .attr("stroke-width", 1.2)
                  .attr("d", d3.line()
-                               .x( function(d, idx) { return xScale(radiationMeasurements[key.toString()].timestamps[idx]); } )
+                               .x( function(d, idx) { return xScale(new Date(radiationMeasurements.get(key.toString()).get("timestamps")[idx])); } )
                                .y( function(d) { return yScale(d); } )
                   );
 
@@ -78,7 +78,7 @@ function drawLineChart(lineSvg, radiationMeasurements, keys, toolTipDiv) {
      path.attr("stroke-dasharray", totalLength + " " + totalLength)
          .attr("stroke-dashoffset", totalLength)
         .transition()
-         .duration(4000)
+         .duration(1700)
          .ease(d3.easeLinear)
          .attr("stroke-dashoffset", 0);
 
@@ -92,7 +92,7 @@ function drawLineChart(lineSvg, radiationMeasurements, keys, toolTipDiv) {
 
       g.append("g")
        .append("rect")
-       .data(radiationMeasurements[key.toString()].readings)
+       .data(radiationMeasurements.get(key.toString()).get("readings"))
        .attr("class", "overlay")
        .attr("width", 974.817)
        .attr("height", lineInnerHeight)
@@ -107,8 +107,9 @@ function drawLineChart(lineSvg, radiationMeasurements, keys, toolTipDiv) {
                      .style("opacity", 0)
         })
        .on("mousemove", function(d, idx) {
-           var currentTimestamp = xScale.invert(d3.mouse(this)[0]); // get the current timestamp
-           var sensorReading = radiationMeasurements[key.toString()].readings[d3.mouse(this)[0]];
+           var currentTimestamp = new Date(xScale.invert(d3.mouse(this)[0])); // get the current timestamp
+           var sensorReading = radiationMeasurements.get(key.toString()).get("readings")[d3.mouse(this)[0]];
+           var time = [ currentTimestamp.getHours(), currentTimestamp.getMinutes(), currentTimestamp.getSeconds() ].join(":");
 
            focus.attr("transform", "translate(" + (xScale(currentTimestamp) + 100) + "," + yScale(sensorReading) + ")");
            toolTipDiv.transition()
@@ -121,8 +122,8 @@ function drawLineChart(lineSvg, radiationMeasurements, keys, toolTipDiv) {
              left = left - 105;
            }
 
-           toolTipDiv.html("<table><tbody><tr><td class='wide'>Timestamp: </td><td>" + currentTimestamp + "</td></tr>" +
-                 "<tr><td>Radiation:</td><td>" + sensorReading + " </td></tr></tbody></table>")
+           toolTipDiv.html("<table><tbody><tr><td class='wide'>Timestamp: </td><td>" + time + "</td></tr>" +
+                 "<tr><td>Radiation:</td><td>" + sensorReading.toFixed(2) + " </td></tr></tbody></table>")
                      .style("left", left + "px")
                      .style("top", (d3.event.pageY + 5) + "px");
 

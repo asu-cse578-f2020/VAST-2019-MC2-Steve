@@ -32,14 +32,20 @@ function drawMobileSensors(map, mapProjection, mobileSensorReadings, sensor_id) 
      .style("fill", "#6300b6");
 
 
+   var data = values.get(sensor_id).get("locations");
+
    var path = g.append("path")
                .attr("class", "line")
-               .datum(values.get(sensor_id).get("locations"))
+               .datum(data)
                .attr("fill", "none")
                .attr("stroke", "black")
                .attr("stroke-width", 0.7)
                .attr("d", d3.line()
-                             .x( function(d) { return mapProjection(d)[0]; } )
+                             .x( function(d, i) {
+                               if (values.get(sensor_id).get("readings")[i] > 25)
+                                  drawPoint(g, mapProjection, d)
+                               return mapProjection(d)[0];
+                              })
                              .y( function(d) { return mapProjection(d)[1]; } )
                 );
 
@@ -50,6 +56,25 @@ function drawMobileSensors(map, mapProjection, mobileSensorReadings, sensor_id) 
       .transition()
        .duration(5000)
        .ease(d3.easeLinear)
-       .attr("stroke-dashoffset", 0);
+       .attr("stroke-dashoffset", 0)
+
+
+}
+
+function drawPoint(g, mapProjection, d) {
+
+  g.append("g")
+   .attr("class", "bloom-point")
+   .append("circle")
+          .attr("cx", mapProjection(d)[0])
+          .attr("cy", mapProjection(d)[1])
+          .attr("r", 0)
+          .style("fill", "red")
+          .attr("stroke", "black")
+          .attr("stroke-width", 0)
+          .transition()
+            .duration(3000)
+            .attr("r", 2)
+            .attr("stroke-width", 1);
 
 }
