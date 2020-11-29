@@ -56,36 +56,47 @@
       </button>
 
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <select class="selectpicker mobile-select-picker dropdown show-tick" data-live-search="true" title="Mobile Sensors" data-style="btn-sm btn-primary" data-width="fit" data-size="4" id="mobile-sensor-id" name="mobile-sensor-picker">
-        </select>
-        <select class="selectpicker static-select-picker dropdown show-tick" data-live-search="true" title="Static Sensors" data-style="btn-sm btn-primary" data-width="fit" data-size="4" id="static-sensor-id" name="static-sensor-picker">
-        </select>
+        <select class="selectpicker mobile-select-picker dropdown show-tick" data-live-search="true" title="Mobile Sensors" data-style="btn-sm btn-primary" data-width="fit" data-size="4" id="mobile-sensor-id" name="mobile-sensor-picker"></select>
         &nbsp;&nbsp;&nbsp;
-        <select class="selectpicker dropdown show-tick" data-live-search="true" title="St. Himark Regions" data-style="btn-sm btn-primary" data-width="fit" data-size="4" id="region-id" name="region-picker">
-        </select>
+        <select class="selectpicker static-select-picker dropdown show-tick" data-live-search="true" title="Static Sensors" data-style="btn-sm btn-primary" data-width="fit" data-size="4" id="static-sensor-id" name="static-sensor-picker"></select>
         &nbsp;&nbsp;&nbsp;
+        <select class="selectpicker dropdown show-tick" data-live-search="true" title="St. Himark Regions" data-style="btn-sm btn-primary" data-width="fit" data-size="4" id="region-id" name="region-picker"></select>
       </div>
     </nav>
 
+
+    <br/>
 
     <!-- Grid for choropleth and pipe chart -->
     <div class="container-fluid" style="width:100%;">
       <div class="row no-gutters">
         <div class="col-sm">
-          <svg class="map"></svg>
+          <div class="card" style="width: 610px; height: 600px;">
+            <span class="map-header"> <h5 class="card-header">St. Himark Map</h5> </span>
+            <div class="card-body">
+              <svg class="map"></svg>
+            </div>
+          </div>
+
         </div>
         <div class="col-sm">
-          <svg class="barChart"></svg>
+          <div class="card" style="width: 630px; height: 600px;">
+            <h5 class="card-header">Innovative View Leaf Chart</h5>
+            <div class="card-body">
+              <svg class="barChart"></svg>
+            </div>
+
         </div>
       </div>
     </div>
 
     <hr/>
     <svg class="mobileSensorProximity"></svg>
+    <hr/>
     <center>
       <svg class="heat"></svg>
     </center>
-    <hr/>
+
     <!-- <svg class="sensorProximity"></svg> -->
 
 

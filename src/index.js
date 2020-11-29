@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const STATIC_SENSOR_IDX = [12, 15, 13, 11, 6, 1, 9, 14, 4];
 
 
-    
+
     STATIC_SENSOR_IDX.sort((a,b)=>a-b);
     MOBILE_SENSOR_IDX.sort((a,b)=>a-b);
 
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     .attr("height", 240);
 
     var map = d3.select(".map")
-                .attr("width", 600)
+                .attr("width", 575)
                 .attr("height", 550);
 
     var barChart = d3.select(".barChart")
@@ -72,11 +72,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 .attr("width", 1264)
                 .attr("height", 750);
 
-                
+
     // Setting projection parameters
     var mapProjection = d3.geoMercator()
                           .scale(120000)
-                          .center([ -119.88075, 0.125 ])
+                          .center([ -119.87500, 0.113 ])
                           .translate([ 220, 250 ]);
 
     var geoPath = d3.geoPath().projection(mapProjection);
@@ -130,12 +130,9 @@ document.addEventListener('DOMContentLoaded', function() {
       });
 
 
-      //   12, 15, 13, 11, 6, 1, 9, 14, 4
-    //  sensorProximity("12", sensorProximitySVG, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings);
-
       // Radiation Measurements for each static sensor
-     radiationMeasurements = new Map();
-     staticSensorLocations.forEach(d => {
+      radiationMeasurements = new Map();
+      staticSensorLocations.forEach(d => {
        let sensorID = d["Sensor-id"];
        let tempMap = new Map();
        tempMap.set("readings", []);
@@ -153,16 +150,16 @@ document.addEventListener('DOMContentLoaded', function() {
        });
      });
 
-     var regionFreqArray = drawBarChart(barChart, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings);
-     var regionFreqDict = {};
-     regionFreqArray.forEach(d => { regionFreqDict[d[0].toString()] = d[1]; });
+      var regionFreqArray = drawBarChart(barChart, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings);
+      var regionFreqDict = {};
+      regionFreqArray.forEach(d => { regionFreqDict[d[0].toString()] = d[1]; });
 
 
      /**
      Color scale for the choropleth map.
      Based on the number of sensor readings per region. **/
 
-     var geoMapColorScale = d3.scaleLog()
+    var geoMapColorScale = d3.scaleLog()
                               .domain([ 2000, 7994 ])
                               .range([ "#c6dbef", "#6baed6", "#3182bd", "#08519c" ]);
 
@@ -177,10 +174,10 @@ document.addEventListener('DOMContentLoaded', function() {
                    .style("fill", d => { return geoMapColorScale(regionFreqDict[d.properties.Name]); })
                    .style("stroke", "white")
                    .on("mouseover", function(d) {
-                     d3.select(this).style("stroke", "white").style("stroke-width", 10);
+                     d3.select(this).style("stroke", "white").attr("stroke-width", 10);
                    })
                    .on("mouseout", function(d) {
-                     d3.select(this).style("stroke", "white").style("stroke-width", 1);
+                     d3.select(this).style("stroke", "white").attr("stroke-width", 1);
                    })
                    .on("click", function(d) {
                       transitionLine(d.properties.Name);
@@ -203,6 +200,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .data(geoData.features)
         .enter()
          .append("svg:text")
+         .attr("transform", d => { if (d.properties.Name == "Wilson Forest") return "rotate(-90, 550.9, 278.9)"; else return "rotate(0)"; })
          .text(d => {
            return d.properties.Name;
          })
@@ -260,15 +258,7 @@ document.addEventListener('DOMContentLoaded', function() {
          .style("fill", "#42ff00")
          .style("opacity", 1)
          .style("stroke", "#42ff00")
-         .on("click", function(d) {
-           // Clear the colours of all the line charts
-           //d3.selectAll(".line").attr("stroke", "black");
 
-           // Highlight the corresponding line chart
-           //let line = d3.select(".static-sensor-curve-" + d["Sensor-id"]);
-           //line.select(".line").attr("stroke", "orange");
-
-         });
 
     var circles = d3.select(".static-sensors").selectAll("circle");
     pulse(circles);
@@ -294,7 +284,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .attr("r", d => { if (radiationMeasurements.get(d["Sensor-id"]).get("readings")[i] > 15) return 10; else return 2; })
             .transition()
             .duration(1000)
-            .attr("stroke-width", d => { return radiationMeasurements.get(d["Sensor-id"]).get("readings")[i] + 70; })
+            .attr("stroke-width", d => {  getMapHeaderTimestamp(i, d["Sensor-id"]); return radiationMeasurements.get(d["Sensor-id"]).get("readings")[i] + 70; })
             .attr('stroke-opacity', 0)
             .ease(d3.easeSin)
             .on("end", repeat);
@@ -305,7 +295,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })();
     }
 
-    d3.select("#mobile-sensor-id")
+   d3.select("#mobile-sensor-id")
     .on("change", function() {
       d3.select(".mobile-sensors").remove().exit();
       drawMobileSensors(map, mapProjection, mobileSensorReadings, this.value);
@@ -350,6 +340,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
   });
 
+   // Updates the timestamp on map header
+   function getMapHeaderTimestamp(index, sensorID) {
+     let timestamp = radiationMeasurements.get(sensorID).get("timestamps")[index];
+     d3.select(".map-header").html("<h5 class='card-header'> St. Himark Map &nbsp; &nbsp;  <span class='badge badge-pill badge-dark'>Timestamp: " + timestamp + "</span> </h5 ");
+   }
 
   } // End of drawMap function
 
