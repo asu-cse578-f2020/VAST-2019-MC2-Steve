@@ -9,14 +9,24 @@ function drawCircularHeat(heat, regionID, geoData, mobileData, staticData) {
   var dayData = [];
   var total = 0;
   var ctr = 0;
+  var flag = 0;
   var currentHour = mobileData[0]['Timestamp'].split(" ")[1].split(":")[0];
   for (var i = 0; i < mobileData.length; i++) {
       if (d3.geoContains(regionData[0], [ mobileData[i]["Long"], mobileData[i]["Lat"] ])) {
         if (currentHour != mobileData[i]['Timestamp'].split(" ")[1].split(":")[0]) {
-            dayData.push(total / ctr);
+            if (flag == 1) {
+                dayData.push(total / ctr);
+                ctr = 1;
+                total = parseFloat(mobileData[i]['Value']);
+                flag = 0;
+            }
+            else {
+              flag += 1;
+              total += parseFloat(mobileData[i]['Value']);
+              ctr += 1;
+            }
             currentHour = mobileData[i]['Timestamp'].split(" ")[1].split(":")[0];
-            ctr = 1;
-            total = parseFloat(mobileData[i]['Value']);
+
         } else {
             total += parseFloat(mobileData[i]['Value']);
             ctr += 1;
@@ -24,29 +34,40 @@ function drawCircularHeat(heat, regionID, geoData, mobileData, staticData) {
       }
   }
 
-  while (dayData.length < 120)
+  while (dayData.length < 60)
       dayData.push(0)
 
   var total = 0;
   var index = 0;
   var ctr = 0;
+  var flag = 0;
   var currentHour = staticData[0]['Timestamp'].split(" ")[1].split(":")[0];
   for (var i = 0; i < staticData.length; i++) {
       if (d3.geoContains(regionData[0], [ staticData[i]["Long"], staticData[i]["Lat"] ])) {
         if (currentHour != staticData[i]['Timestamp'].split(" ")[1].split(":")[0]) {
-            var temp = dayData[index];
-            temp += (total / ctr);
-            dayData[index] = temp;
-            index++;
+            if (flag == 1) {
+              var temp = dayData[index];
+              temp += (total / ctr);
+              dayData[index] = temp;
+              index++;
+              ctr = 1;
+              total = parseFloat(staticData[i]['Value']);
+              flag = 0;
+            }
+            else {
+              total += parseFloat(staticData[i]['Value']);
+              ctr += 1;
+              flag += 1;
+            }
             currentHour = staticData[i]['Timestamp'].split(" ")[1].split(":")[0];
-            ctr = 1;
-            total = parseFloat(staticData[i]['Value']);
+
         } else {
             total += parseFloat(staticData[i]['Value']);
             ctr += 1;
         }
     }
   }
+
 
   /* Create the chart */
   var chart = circularHeatChart()
@@ -55,7 +76,7 @@ function drawCircularHeat(heat, regionID, geoData, mobileData, staticData) {
       .numSegments(5)
       .range(['white', 'blue'])
       .segmentLabels(days)
-      .radialLabels(["Midnight", "1am", "2am", "3am", "4am", "5am", "6am", "7am", "8am", "9am", "10am", "11am", "Midday", "1pm", "2pm", "3pm", "4pm", "5pm", "6pm", "7pm", "8pm", "9pm", "10pm", "11pm"]);
+      .radialLabels([ "Midnight", "2am", "4am", "6am", "8am", "10am", "Midday", "2pm", "4pm", "6pm", "8pm", "10pm" ]);
 
   heat.selectAll('svg')
       .data([dayData])
@@ -70,7 +91,7 @@ function circularHeatChart() {
 
     var margin = { top: 20, right: 20, bottom: 20, left: 20 },
         innerRadius = 50,
-        numSegments = 24,
+        numSegments = 12,
         segmentHeight = 20,
         domain = null,
         range = ["white", "red"],
