@@ -53,10 +53,10 @@ div.tooltip-donut {
     position: absolute;
     text-align: center;
     padding: .5rem;
-    background: #FFFFFF;
-    color: #313639;
-    border: 1px solid #313639;
-    border-radius: 8px;
+    background: black;
+    color: white;
+    border: 1px solid black;
+    border-radius: 4px;
     pointer-events: none;
-    font-size: 1.3rem;
+    font: 0.80em sans-serif;
 }

@@ -61,8 +61,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 .attr("height", 550);
 
     var heat = d3.select(".heat")
-        .attr("width", 800)
-        .attr("height", 800);
+        .attr("width", 460)
+        .attr("height", 460);
 
     var sensorProximitySVG = d3.select(".sensorProximity")
                 .attr("width", 1110)
@@ -326,6 +326,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
      // Remove all the child nodes of lineSvg.
      d3.select(".staticSensorLineChart").selectAll("g").remove();
+
      if (hashmap.has(regionID)) {
        let keys = hashmap.get(regionID);
        drawLineChart(lineSvg, radiationMeasurements, keys, toolTipDiv);
