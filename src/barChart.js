@@ -4,8 +4,14 @@ const LONG = "Long";
 const CO_ORDINATES = "Co-ordinates";
 const PETAL_PATH = "M0 0 C50 40 50 70 20 100 L0 85 L-20 100 C-50 70 -50 40 0 0";
 const LEAF_PATH = "M0 15 C15 40 15 60 0 75 C-15 60 -15 40 0 15";
+const STATIC = "static";
+const MOBILE = "mobile";
 var xScaleBar;
 var yScaleBarBar;
+let transitionScale = d3.scaleLinear()
+            .domain([ 0, 8000 ])
+            .range([ 0, 1 ]);
+let regionMap;
 
 function drawBarChart(barChartSVG, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings)
 {
@@ -18,11 +24,11 @@ function drawBarChart(barChartSVG, geoData, staticSensorLocations, staticSensorR
     const height = 500 - margin.top - margin.bottom;
     const width = 600 - margin.left - margin.right;
 
-    let regionMap = new Map();
+    regionMap = new Map();
     let staticSensorLocationMap = new Map();
 
     geoData.features.forEach(element => {
-        regionMap.set(getNameFromGeoData(element),0);
+        regionMap.set(getNameFromGeoData(element),{[STATIC]: 0, [MOBILE]: 0});
     });
 
     staticSensorLocations.forEach(element => {
@@ -40,7 +46,7 @@ function drawBarChart(barChartSVG, geoData, staticSensorLocations, staticSensorR
         geoData.features.forEach(region => {
             if (d3.geoContains(region, reading[CO_ORDINATES]))
             {
-                regionMap.set(getNameFromGeoData(region), regionMap.get(getNameFromGeoData(region))+1);
+                regionMap.set(getNameFromGeoData(region),  {...regionMap.get(getNameFromGeoData(region)), [STATIC]: regionMap.get(getNameFromGeoData(region))[STATIC]+1});
             }
         });
     });
@@ -49,7 +55,7 @@ function drawBarChart(barChartSVG, geoData, staticSensorLocations, staticSensorR
         geoData.features.forEach(region => {
             if (d3.geoContains(region, [reading[LONG], reading[LAT]]))
             {
-                regionMap.set(getNameFromGeoData(region), regionMap.get(getNameFromGeoData(region))+1);
+                regionMap.set(getNameFromGeoData(region), {...regionMap.get(getNameFromGeoData(region)), [MOBILE]: regionMap.get(getNameFromGeoData(region))[MOBILE]+1});
             }
         });
     });
@@ -75,7 +81,9 @@ function drawBarChart(barChartSVG, geoData, staticSensorLocations, staticSensorR
     g.append("g")
           .call(d3.axisLeft(yScaleBar));
 
+
     let regionFreqArray = Array.from(regionMap, ([name, value]) => ([name, value]));
+    // .map(d=>[d[0], d[1][STATIC]+d[1][MOBILE]])
 
     g.append("g")
      .attr("class", "radiation-lines")
@@ -91,7 +99,7 @@ function drawBarChart(barChartSVG, geoData, staticSensorLocations, staticSensorR
             .attr("stroke", "black")
             .transition()
                 .duration(500)
-                .attr("y1", function(d) { return yScaleBar(d[1]); });
+                .attr("y1", function(d) { return yScaleBar(d[1][STATIC]+d[1][MOBILE]); });
 
     /*
     let c = "#69b3a2";
@@ -126,35 +134,39 @@ function drawBarChart(barChartSVG, geoData, staticSensorLocations, staticSensorR
      .data(regionFreqArray)
      .enter()
      .append("path")
+    //  .append("image")
      .classed("radiationPetals", true)
      .attr("id", d => { return "static-radiation-petal-" + d[0].split(" ").join("-"); })
      .attr("d", LEAF_PATH)
+    //  .attr("xlink:href", "../stylesheets/nuclear.svg")
      .attr("fill", "#4AB56D")
      .attr("stroke", "black")
      .style("stroke-width", 4.5)
      .attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(0)] + ")scale(0)rotate(324)"; })
      .transition()
          .duration(700)
-         .attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(d[1])] + ")scale(0.3)rotate(144)"; });
+         .attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(d[1][STATIC]+d[1][MOBILE])] + ")scale("+transitionScale(d[1][STATIC])+")rotate(144)"; });
 
    g.append("g")
     .attr("class", "mobile-reading-petals")
     .selectAll("g.radiationPetals")
     .data(regionFreqArray)
     .enter()
+    // .append("image")
     .append("path")
     .classed("radiationPetals", true)
     .attr("id", d => { return "mobile-radiation-petal-" + d[0].split(" ").join("-"); })
     .attr("d", LEAF_PATH)
+    // .attr("xlink:href", "../stylesheets/truck.svg")
     .attr("fill", "#C70B0B")
     .attr("stroke", "black")
     .style("stroke-width", 4.5)
     .attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(0)] + ")scale(0)rotate(-36)"; })
     .transition()
         .duration(700)
-        .attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(d[1])] + ")scale(0.3)rotate(216)"; });
+        .attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(d[1][STATIC]+d[1][MOBILE])] + ")scale("+transitionScale(d[1][MOBILE])+")rotate(216)"; });
 
-    return regionFreqArray;
+    return regionFreqArray.map(d=>[d[0], d[1][STATIC]+d[1][MOBILE]]);
 }
 
 function getNameFromGeoData(data)
@@ -164,39 +176,52 @@ function getNameFromGeoData(data)
 
 function transitionLine(regionName) {
 
-  // Toggle innovative view
-  regionName = regionName.split(" ").join("-")
-  let staticPetalID = "#static-radiation-petal-" + regionName;
-  let mobilePetalID = "#mobile-radiation-petal-" + regionName;
-  let radiationLine = "#radiation-line-" + regionName;
 
-  d3.select(".radiation-lines").selectAll("line").attr("stroke-width", 0.15);
-  d3.select(".static-reading-petals").selectAll("path").style("opacity", 0.15).attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(d[1])] + ")scale(0.3)rotate(144)"; });;
-  d3.select(".mobile-reading-petals").selectAll("path").style("opacity", 0.15).attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(d[1])] + ")scale(0.3)rotate(216)"; });;
+    // let xScaleBar = d3.scaleBand()
+    //         .range([ 0,  550])
+    //         .domain([...regionMap.keys()])
+    //         .padding(1);
 
-  d3.select(radiationLine)
-    .attr("x1", d => xScaleBar(d[0]))
-    .attr("x2", d => xScaleBar(d[0]))
-    .attr("y1", yScaleBar(0))
-    .attr("y2", yScaleBar(0))
-    .attr("stroke", "black")
-    .transition()
-      .duration(700)
-      .attr("y1", function(d) { return yScaleBar(d[1]); })
-      .attr("stroke-width", 2);
 
-  d3.select(staticPetalID)
-    .attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(0)] + ")scale(0)rotate(384)"; })
-    .transition()
-      .duration(700)
-      .attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(d[1])] + ")scale(0.6)rotate(144)"; })
-      .style("opacity", 1);
 
-  d3.select(mobilePetalID)
-    .attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(0)] + ")scale(0)rotate(-196)"; })
-    .transition()
-      .duration(700)
-      .attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(d[1])] + ")scale(0.6)rotate(216)"; })
-      .style("opacity", 1);
+    // let yScaleBar = d3.scaleLinear()
+    //     .domain([ 0, 10000 ])
+    //     .range([ 400, 0 ]);
+    
+    // Toggle innovative view
+    regionName = regionName.split(" ").join("-")
+    let staticPetalID = "#static-radiation-petal-" + regionName;
+    let mobilePetalID = "#mobile-radiation-petal-" + regionName;
+    let radiationLine = "#radiation-line-" + regionName;
+
+    d3.select(".radiation-lines").selectAll("line").attr("stroke-width", 0.15);
+    d3.select(".static-reading-petals").selectAll("path").style("opacity", 0.15).attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(d[1][STATIC]+d[1][MOBILE])] + ")scale("+transitionScale(d[1][STATIC])+")rotate(144)"; });;
+    d3.select(".mobile-reading-petals").selectAll("path").style("opacity", 0.15).attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(d[1][STATIC]+d[1][MOBILE])] + ")scale("+transitionScale(d[1][MOBILE])+")rotate(216)"; });;
+
+
+    d3.select(radiationLine)
+        .attr("x1", d => xScaleBar(d[0]))
+        .attr("x2", d => xScaleBar(d[0]))
+        .attr("y1", yScaleBar(0))
+        .attr("y2", yScaleBar(0))
+        .attr("stroke", "black")
+        .transition()
+        .duration(700)
+        .attr("y1", function(d) { return yScaleBar(d[1][STATIC]+d[1][MOBILE]); })
+        .attr("stroke-width", 2);
+
+    d3.select(staticPetalID)
+        .attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(0)] + ")scale(1)rotate(384)"; })
+        .transition()
+        .duration(700)
+        .attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(d[1][STATIC]+d[1][MOBILE])] + ")scale("+transitionScale(d[1][STATIC])+")rotate(144)"; })
+        .style("opacity", 1);
+
+    d3.select(mobilePetalID)
+        .attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(0)] + ")scale(1)rotate(-196)"; })
+        .transition()
+        .duration(700)
+        .attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(d[1][STATIC]+d[1][MOBILE])] + ")scale("+transitionScale(d[1][MOBILE])+")rotate(216)"; })
+        .style("opacity", 1);
 
 }
