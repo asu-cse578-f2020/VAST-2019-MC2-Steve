@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
                   .attr("value", id);
     });
     var regionSelectPicker = d3.select(".navbar")
-                               .select("#region-id");
+                               .select(".region-select-picker");
 
 
     // Define the div for the tooltip
@@ -100,15 +100,18 @@ document.addEventListener('DOMContentLoaded', function() {
       geoData.features.forEach(d => {
         let locationID = d.properties.Id;
         let locationName = d.properties.Name;
-
+        
+        //console.log(d);
         // Populate the region select picker with region names
         regionSelectPicker.append("option")
                           .text(locationName)
                           .attr("value", locationID);
+        //console.log(regionSelectPicker);
 
         regionNameMappings.set(locationID, locationName);
       });
-
+      
+      $('.region-select-picker').selectpicker('refresh');
       // Hashmap for associating area ID with sensor-id { areaID: sensorID }
       var hashmap = new Map();
 
