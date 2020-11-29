@@ -39,6 +39,7 @@
           </div>
           <div class="modal-body">
             <svg class="staticSensorLineChart"></svg>
+            <svg class="sensorProximity"></svg>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-dark btn-sm" data-dismiss="modal">Close</button>
@@ -55,7 +56,9 @@
       </button>
 
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <select class="selectpicker dropdown show-tick" data-live-search="true" title="Mobile Sensors" data-style="btn-sm btn-primary" data-width="fit" data-size="4" id="mobile-sensor-id" name="mobile-sensor-picker">
+        <select class="selectpicker mobile-select-picker dropdown show-tick" data-live-search="true" title="Mobile Sensors" data-style="btn-sm btn-primary" data-width="fit" data-size="4" id="mobile-sensor-id" name="mobile-sensor-picker">
+        </select>
+        <select class="selectpicker static-select-picker dropdown show-tick" data-live-search="true" title="Static Sensors" data-style="btn-sm btn-primary" data-width="fit" data-size="4" id="static-sensor-id" name="static-sensor-picker">
         </select>
         &nbsp;&nbsp;&nbsp;
         <select class="selectpicker dropdown show-tick" data-live-search="true" title="St. Himark Regions" data-style="btn-sm btn-primary" data-width="fit" data-size="4" id="region-id" name="region-picker">
@@ -78,15 +81,17 @@
     </div>
 
     <hr/>
+    <svg class="mobileSensorProximity"></svg>
     <center>
       <svg class="heat"></svg>
     </center>
     <hr/>
-    <svg class="sensorProximity"></svg>
+    <!-- <svg class="sensorProximity"></svg> -->
 
 
   </body>
 
+  <script src="src/mobileSensorProximity.js"></script>
   <script src="src/sensorProximity.js"></script>
   <script src="src/lineChart.js"></script>
   <script src="src/barChart.js"></script>

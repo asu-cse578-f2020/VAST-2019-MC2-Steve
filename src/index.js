@@ -5,8 +5,16 @@ document.addEventListener('DOMContentLoaded', function() {
    const MOBILE_SENSOR_IDX = [ 15, 22, 40,  1, 27, 30,  8, 41,  9, 37, 26, 16, 49, 13,  2, 31, 44,
                      6, 43, 14, 11, 23, 32,  3,  5, 35, 24,  4, 34, 45, 47, 39, 19, 29,
                      38, 12, 33, 17, 46, 10,  7, 18, 20, 50, 28, 48, 36, 25, 42, 21 ];
+    const STATIC_SENSOR_IDX = [12, 15, 13, 11, 6, 1, 9, 14, 4];
+
+
+    
+    STATIC_SENSOR_IDX.sort((a,b)=>a-b);
+    MOBILE_SENSOR_IDX.sort((a,b)=>a-b);
 
     // Populate the mobile sensor dropdown
+    var selectpicker = d3.select(".navbar")
+                     .select(".mobile-select-picker");
     var mobileSensorSelectPicker = d3.select(".navbar")
                                      .select("#mobile-sensor-id");
 
@@ -17,6 +25,15 @@ document.addEventListener('DOMContentLoaded', function() {
                               .attr("value", id);
     });
 
+    var staticSelectpicker = d3.select(".navbar")
+                     .select(".static-select-picker");
+
+
+    STATIC_SENSOR_IDX.forEach(id => {
+      staticSelectpicker.append("option")
+                  .text("Static Sensor " + id)
+                  .attr("value", id);
+    });
     var regionSelectPicker = d3.select(".navbar")
                                .select("#region-id");
 
@@ -51,6 +68,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 .attr("width", 1264)
                 .attr("height", 750);
 
+    var mobileSensorProximitySVG = d3.select(".mobileSensorProximity")
+                .attr("width", 1264)
+                .attr("height", 750);
+
+                
     // Setting projection parameters
     var mapProjection = d3.geoMercator()
                           .scale(120000)
@@ -108,8 +130,8 @@ document.addEventListener('DOMContentLoaded', function() {
       });
 
 
-     // 12, 15, 13, 11, 6, 1, 9, 14, 4
-     sensorProximity("12", sensorProximitySVG, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings);
+      //   12, 15, 13, 11, 6, 1, 9, 14, 4
+    //  sensorProximity("12", sensorProximitySVG, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings);
 
       // Radiation Measurements for each static sensor
      radiationMeasurements = new Map();
@@ -287,6 +309,21 @@ document.addEventListener('DOMContentLoaded', function() {
     .on("change", function() {
       d3.select(".mobile-sensors").remove().exit();
       drawMobileSensors(map, mapProjection, mobileSensorReadings, this.value);
+      mobileSensorProximity(this.value, mobileSensorProximitySVG, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings);
+
+   });
+
+   d3.select("#static-sensor-id")
+    .on("change", function() {
+    //   d3.select(".mobile-sensors").remove().exit();
+
+    $("#sensorReadingsModal").modal("toggle");
+    // d3.select("#sensorReadingsModal").select(".modal-title").text(d.properties.Name);
+
+    // Remove all the child nodes of lineSvg
+    d3.select(".staticSensorLineChart").selectAll("g").remove();
+    sensorProximity(this.value, sensorProximitySVG, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings);
+
    });
 
    d3.select("#region-id")

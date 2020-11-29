@@ -9,6 +9,7 @@ var lineMargin, lineWidth, lineHeight, lineInnerWidth, lineInnerHeight, timeXSca
 
 function sensorProximity(staticSensorId, sensorProximitySVG, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings)
 {
+    d3.selectAll(".proximity-line-and-dots").remove();
     // const margin = {top: 50, right: 50, bottom: 50, left: 50};
     // const height = 500 - margin.top - margin.bottom;
     // const width = 800 - margin.left - margin.right;
@@ -36,7 +37,7 @@ function sensorProximity(staticSensorId, sensorProximitySVG, geoData, staticSens
             sensorData.set(staticSensorId, [...sensorData.get(staticSensorId), d]);
         }
     })
-
+   
     var sumstat = d3.nest()
         .key(function(d) { return d[SENSOR_ID];})
         .entries(sensorData.get(staticSensorId));
@@ -48,7 +49,7 @@ function sensorProximity(staticSensorId, sensorProximitySVG, geoData, staticSens
     drawBaseLine(g, staticSensorReadings);
     drawVariableLines(g, sumstat);
 
-    // d3.selectAll(".proximity-line-and-dots").remove();
+    
 
 }
 
@@ -112,7 +113,7 @@ function drawVariableLines(g, sumstat)
                 .attr("transform", "translate(50," + (lineInnerHeight ) + ")")
                 .attr("class", "data-circle")
                 .attr("r", 3)
-                .style("fill", colors[i])
+                .style("fill", function(d, idx) {return colors[Number(d[SENSOR_ID])]; })
                 .attr("cx", function(d, idx) {return timeXScale(new Date(d["Timestamp"])); })
                 .attr("cy", function(d, idx) { return yScale(d["Value"]); } );
     }
