@@ -364,12 +364,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Draw the circular heatmap
     drawCircularHeat(heat, regionID, geoData, mobileSensorReadings, staticSensorReadings);
-
+    d3.select(".heat-chart-header").html("<h5 class='card-header'> Circular Heat Chart: " + regionNameMappings.get(regionID) + "</h5 ");
   });
 
    // Updates the timestamp on map header
    function getMapHeaderTimestamp(index, sensorID) {
-     console.log(index);
      let timestamp = radiationMeasurements.get(sensorID).get("timestamps")[index];
      d3.select(".map-header").html("<h5 class='card-header'> St. Himark Map &nbsp; &nbsp;  <span class='badge badge-pill badge-dark'>Timestamp: " + timestamp + ":00</span> </h5 ");
    }
