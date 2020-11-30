@@ -14,7 +14,7 @@ function sensorProximity(staticSensorId, sensorProximitySVG, geoData, staticSens
 
     let g = sensorProximitySVG.append("g")
                       .attr("class", "prox-static-sensor-curve");
-    lineMargin = { top: 20, right: 10, bottom: 20, left: 10 };
+    lineMargin = { top: 20, right: 10, bottom: 10, left: 10 };
     lineWidth = +sensorProximitySVG.style('width').replace('px','') - 90;
     lineHeight = 400;
     lineInnerWidth = lineWidth - lineMargin.left - lineMargin.right - 30;

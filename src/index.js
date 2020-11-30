@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
     //               .text("Static Sensor " + id)
     //               .attr("value", id);
     // });
-    
+
     var regionSelectPicker = d3.select(".navbar")
                                .select(".region-select-picker");
 
@@ -112,9 +112,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         regionNameMappings.set(locationID, locationName);
       });
-      
+
       $('.region-select-picker').selectpicker('refresh');
-      
+
 
       let staticSensorLocationMap = new Map();
         //let sensorData = new Map();
@@ -128,13 +128,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 ...e,
                 [CO_ORDINATES]: staticSensorLocationMap.get(e[SENSOR_ID]),
                 [LAT]: staticSensorLocationMap.get(e[SENSOR_ID])[1],
-                [LONG]: staticSensorLocationMap.get(e[SENSOR_ID])[0] 
+                [LONG]: staticSensorLocationMap.get(e[SENSOR_ID])[0]
             }
         });
 
 
 
-     
+
       // Hashmap for associating area ID with sensor-id { areaID: sensorID }
       var hashmap = new Map();
 
@@ -291,7 +291,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // The pulsating effect shows spikes in radiation measurements. When the radius of the
     // circle increases, it is an indication of radiation detection.
     function pulse(circle) {
-
         let i = 0;
         (function repeat() {
 
@@ -309,12 +308,12 @@ document.addEventListener('DOMContentLoaded', function() {
             .attr("r", d => { if (radiationMeasurements.get(d["Sensor-id"]).get("readings")[i] > 15) return 10; else return 2; })
             .transition()
             .duration(1000)
-            .attr("stroke-width", d => {  getMapHeaderTimestamp(i, d["Sensor-id"]); return radiationMeasurements.get(d["Sensor-id"]).get("readings")[i] + 70; })
+            .attr("stroke-width", d => {  getMapHeaderTimestamp(i/9, d["Sensor-id"]); return radiationMeasurements.get(d["Sensor-id"]).get("readings")[i] + 70; })
             .attr('stroke-opacity', 0)
             .ease(d3.easeSin)
             .on("end", repeat);
 
-            if (i == 1200) i = -1;
+            if (i == 1200) { i = -1; index = 0; }
             i += 1;
 
         })();
@@ -371,7 +370,7 @@ document.addEventListener('DOMContentLoaded', function() {
    // Updates the timestamp on map header
    function getMapHeaderTimestamp(index, sensorID) {
      let timestamp = radiationMeasurements.get(sensorID).get("timestamps")[index];
-     d3.select(".map-header").html("<h5 class='card-header'> St. Himark Map &nbsp; &nbsp;  <span class='badge badge-pill badge-dark'>Timestamp: " + timestamp + "</span> </h5 ");
+     d3.select(".map-header").html("<h5 class='card-header'> St. Himark Map &nbsp; &nbsp;  <span class='badge badge-pill badge-dark'>Timestamp: " + timestamp + ":00</span> </h5 ");
    }
 
 
@@ -528,7 +527,3 @@ document.addEventListener('DOMContentLoaded', function() {
        .style("padding", "10px");
   }
 });
-
-
-
-
