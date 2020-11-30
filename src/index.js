@@ -308,7 +308,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .attr("r", d => { if (radiationMeasurements.get(d["Sensor-id"]).get("readings")[i] > 15) return 10; else return 2; })
             .transition()
             .duration(1000)
-            .attr("stroke-width", d => {  getMapHeaderTimestamp(i/9, d["Sensor-id"]); return radiationMeasurements.get(d["Sensor-id"]).get("readings")[i] + 70; })
+            .attr("stroke-width", d => {  getMapHeaderTimestamp(i, d["Sensor-id"]); return radiationMeasurements.get(d["Sensor-id"]).get("readings")[i] + 70; })
             .attr('stroke-opacity', 0)
             .ease(d3.easeSin)
             .on("end", repeat);
@@ -369,6 +369,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
    // Updates the timestamp on map header
    function getMapHeaderTimestamp(index, sensorID) {
+     console.log(index);
      let timestamp = radiationMeasurements.get(sensorID).get("timestamps")[index];
      d3.select(".map-header").html("<h5 class='card-header'> St. Himark Map &nbsp; &nbsp;  <span class='badge badge-pill badge-dark'>Timestamp: " + timestamp + ":00</span> </h5 ");
    }
