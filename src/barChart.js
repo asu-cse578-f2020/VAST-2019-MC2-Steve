@@ -58,7 +58,8 @@ function drawBarChart(barChartSVG, geoData, staticSensorLocations, staticSensorR
     mobileSensorReadings.forEach(reading => {
         geoData.features.forEach(region => {
             if (d3.geoContains(region, [reading[LONG], reading[LAT]]))
-            {
+            {   
+                // console.log(region)
                 regionMap.set(getNameFromGeoData(region), {...regionMap.get(getNameFromGeoData(region)), [MOBILE]: regionMap.get(getNameFromGeoData(region))[MOBILE]+1});
             }
         });

@@ -19,11 +19,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                      .select("#mobile-sensor-id");
 
 
-    MOBILE_SENSOR_IDX.forEach(id => {
-      mobileSensorSelectPicker.append("option")
-                              .text("Mobile Sensor " + id)
-                              .attr("value", id);
-    });
+    // MOBILE_SENSOR_IDX.forEach(id => {
+    //   mobileSensorSelectPicker.append("option")
+    //                           .text("Mobile Sensor " + id)
+    //                           .attr("value", id);
+    // });
 
     var staticSelectpicker = d3.select(".navbar")
                      .select(".static-select-picker");
@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
                      d3.select(this).style("stroke", "white").attr("stroke-width", 1);
                    })
                    .on("click", function(d) {
-                      transitionLine(d.properties.Name);
+                        onRegionClick(d);
                    });
 
 
@@ -351,7 +351,43 @@ document.addEventListener('DOMContentLoaded', function() {
      d3.select(".map-header").html("<h5 class='card-header'> St. Himark Map &nbsp; &nbsp;  <span class='badge badge-pill badge-dark'>Timestamp: " + timestamp + "</span> </h5 ");
    }
 
+
+   function onRegionClick(d){
+
+        transitionLine(d.properties.Name);
+        filterMobileSensorsPerRegion(d.properties.Name, geoData, mobileSensorSelectPicker, mobileSensorReadings);
+    }
+
+    function filterMobileSensorsPerRegion(regionName, geoData,mobileSensorSelectPicker, mobileSensorReadings)
+    {
+        let mobileSensorSet = new Set();
+        let currentGeoData = geoData.features.filter(d=> d.properties.Name===regionName)[0];
+
+        mobileSensorReadings.forEach(reading => {
+            if (d3.geoContains(currentGeoData, [reading[LONG], reading[LAT]]))
+            {
+                mobileSensorSet.add(reading[SENSOR_ID]);
+            }
+        });
+
+
+        document.getElementById("mobile-sensor-id").innerHTML = "";
+        // mobileSensorSelectPicker.empty();
+        // let mobileSelect = d3.select(".mobile-select-picker");
+        Array.from(mobileSensorSet).forEach(id => {
+            // console.log(id);
+            mobileSensorSelectPicker.append("option")
+                                    .text("Mobile Sensor " + id)
+                                    .attr("value", id);
+        });
+        $('.mobile-select-picker').selectpicker('refresh');
+        // console.log(mobileSensorSet);
+    }
+
   } // End of drawMap function
+
+
+
 
   function getPeakValueTimestamp(radiationMeasurements, keys) {
 
@@ -449,3 +485,7 @@ document.addEventListener('DOMContentLoaded', function() {
        .style("padding", "10px");
   }
 });
+
+
+
+
