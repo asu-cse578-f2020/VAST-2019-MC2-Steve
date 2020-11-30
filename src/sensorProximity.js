@@ -45,7 +45,6 @@ function sensorProximity(staticSensorId, sensorProximitySVG, geoData, staticSens
         .key(function(d) { return d[SENSOR_ID];})
         .entries(sensorData.get(staticSensorId));
 
-    console.log(sumstat);
     staticSensorReadings = staticSensorReadings.filter(e => e[SENSOR_ID]===staticSensorId);
 
     drawAxis(sensorProximitySVG);
@@ -186,7 +185,7 @@ function drawBaseLine(g, staticSensorReadings, divTooltip)
                 .attr("class", "proximity-line-and-dots")
                 .attr("transform", "translate(50," + (lineInnerHeight ) + ")")
                 .datum(staticSensorReadings)
-                    
+
                 .attr("fill", "none")
                 .attr("stroke", "black")
                 .style("opacity", 1)

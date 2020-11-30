@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
       geoData.features.forEach(d => {
         let locationID = d.properties.Id;
         let locationName = d.properties.Name;
-        
+
         //console.log(d);
         // Populate the region select picker with region names
         regionSelectPicker.append("option")
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         regionNameMappings.set(locationID, locationName);
       });
-      
+
       $('.region-select-picker').selectpicker('refresh');
       // Hashmap for associating area ID with sensor-id { areaID: sensorID }
       var hashmap = new Map();
