@@ -227,6 +227,15 @@ function drawBarChart(barChartSVG, geoData, staticSensorLocations, staticSensorR
         .duration(700)
         .attr("transform", d => { return "translate(" + [xScaleBar(d[0]), yScaleBar(d[1][STATIC]+d[1][MOBILE])] + ")scale("+transitionScale(d[1][MOBILE])+")rotate(216)"; });
 
+
+        
+    g.append("circle").attr("cx",400).attr("cy",30).attr("r", 6).style("fill", "#4AB56D")
+    g.append("circle").attr("cx",400).attr("cy",60).attr("r", 6).style("fill", "#C70B0B")
+    g.append("text").attr("x", 420).attr("y", 30).text("Static sensor").style("font-size", "15px").attr("alignment-baseline","middle")
+    g.append("text").attr("x", 420).attr("y", 60).text("Mobile sensor").style("font-size", "15px").attr("alignment-baseline","middle")
+
+
+
     return regionFreqArray.map(d=>[d[0], d[1][STATIC]+d[1][MOBILE]]);
 }
 

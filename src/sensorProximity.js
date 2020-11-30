@@ -4,6 +4,7 @@
 // const CO_ORDINATES = "Co-ordinates";
 const START_TIME = "2020-04-06 00:00:00";
 const END_TIME = "2020-04-10 23:54:00";
+var colors = ["#3957ff", "#d3fe14", "#c9080a", "#fec7f8", "#0b7b3e", "#0bf0e9", "#c203c8", "#fd9b39", "#888593", "#906407", "#98ba7f", "#fe6794", "#10b0ff", "#ac7bff", "#fee7c0", "#964c63", "#1da49c", "#0ad811", "#bbd9fd", "#fe6cfe", "#297192", "#d1a09c", "#78579e", "#81ffad", "#739400", "#ca6949", "#d9bf01", "#646a58", "#d5097e", "#bb73a9", "#ccf6e9", "#9cb4b6", "#b6a7d4", "#9e8c62", "#6e83c8", "#01af64", "#a71afd", "#cfe589", "#d4ccd1", "#fd4109", "#bf8f0e", "#2f786e", "#4ed1a5", "#d8bb7d", "#a54509", "#6a9276", "#a4777a", "#fc12c9", "#606f15", "#3cc4d9", "#f31c4e", "#73616f", "#f097c6", "#fc8772", "#92a6fe", "#875b44", "#699ab3", "#94bc19", "#7d5bf0", "#d24dfe", "#c85b74", "#68ff57", "#b62347", "#994b91", "#646b8c", "#977ab4", "#d694fd", "#c4d5b5", "#fdc4bd", "#1cae05", "#7bd972", "#e9700a", "#d08f5d", "#8bb9e1", "#fde945", "#a29d98", "#1682fb", "#9ad9e0", "#d6cafe", "#8d8328", "#b091a7", "#647579", "#1f8d11", "#e7eafd", "#b9660b", "#a4a644", "#fec24c", "#b1168c", "#188cc1", "#7ab297", "#4468ae", "#c949a6", "#d48295", "#eb6dc2", "#d5b0cb", "#ff9ffb", "#fdb082", "#af4d44", "#a759c4", "#a9e03a", "#0d906b"]
 
 var lineMargin, lineWidth, lineHeight, lineInnerWidth, lineInnerHeight, timeXScale, yScale;
 
@@ -35,19 +36,50 @@ function sensorProximity(staticSensorId, sensorProximitySVG, geoData, staticSens
         }
     })
 
+    var divTooltip = d3.select("body").append("div")
+                .attr("class", "tooltip-donut")
+                .style("opacity", 0)
+                .style("z-index", 10000);
+
     var sumstat = d3.nest()
         .key(function(d) { return d[SENSOR_ID];})
         .entries(sensorData.get(staticSensorId));
 
-
+    console.log(sumstat);
     staticSensorReadings = staticSensorReadings.filter(e => e[SENSOR_ID]===staticSensorId);
 
     drawAxis(sensorProximitySVG);
-    drawBaseLine(g, staticSensorReadings);
-    drawVariableLines(g, sumstat);
+    drawBaseLine(g, staticSensorReadings, divTooltip);
+    drawVariableLines(g, sumstat, divTooltip);
+    drawLegend(g, sumstat);
 
 
 
+}
+
+function drawLegend(g, sumstat)
+{
+    let keys = sumstat.map(d => d.key)
+    g.selectAll("mydots")
+        .data(keys)
+        .enter()
+        .append("circle")
+            .attr("cx", 900)
+            .attr("cy", function(d,i){ return 300 + i*25}) // 100 is where the first dot appears. 25 is the distance between dots
+            .attr("r", 5)
+            .style("fill", function(d){ return colors[Number(d)]})
+
+    // Add one dot in the legend for each name.
+    g.selectAll("mylabels")
+        .data(keys)
+        .enter()
+        .append("text")
+            .attr("x", 920)
+            .attr("y", function(d,i){ return 300 + i*25}) // 100 is where the first dot appears. 25 is the distance between dots
+            .style("fill", function(d){ return colors[Number(d)]})
+            .text(function(d){ return "Mobile sensor " + d})
+            .attr("text-anchor", "left")
+            .style("alignment-baseline", "middle")
 }
 
 function drawAxis(sensorProximitySVG)
@@ -86,9 +118,8 @@ function drawAxis(sensorProximitySVG)
         .call(yAxis);
 }
 
-function drawVariableLines(g, sumstat)
+function drawVariableLines(g, sumstat, divTooltip)
 {
-    let colors = ["#3957ff", "#d3fe14", "#c9080a", "#fec7f8", "#0b7b3e", "#0bf0e9", "#c203c8", "#fd9b39", "#888593", "#906407", "#98ba7f", "#fe6794", "#10b0ff", "#ac7bff", "#fee7c0", "#964c63", "#1da49c", "#0ad811", "#bbd9fd", "#fe6cfe", "#297192", "#d1a09c", "#78579e", "#81ffad", "#739400", "#ca6949", "#d9bf01", "#646a58", "#d5097e", "#bb73a9", "#ccf6e9", "#9cb4b6", "#b6a7d4", "#9e8c62", "#6e83c8", "#01af64", "#a71afd", "#cfe589", "#d4ccd1", "#fd4109", "#bf8f0e", "#2f786e", "#4ed1a5", "#d8bb7d", "#a54509", "#6a9276", "#a4777a", "#fc12c9", "#606f15", "#3cc4d9", "#f31c4e", "#73616f", "#f097c6", "#fc8772", "#92a6fe", "#875b44", "#699ab3", "#94bc19", "#7d5bf0", "#d24dfe", "#c85b74", "#68ff57", "#b62347", "#994b91", "#646b8c", "#977ab4", "#d694fd", "#c4d5b5", "#fdc4bd", "#1cae05", "#7bd972", "#e9700a", "#d08f5d", "#8bb9e1", "#fde945", "#a29d98", "#1682fb", "#9ad9e0", "#d6cafe", "#8d8328", "#b091a7", "#647579", "#1f8d11", "#e7eafd", "#b9660b", "#a4a644", "#fec24c", "#b1168c", "#188cc1", "#7ab297", "#4468ae", "#c949a6", "#d48295", "#eb6dc2", "#d5b0cb", "#ff9ffb", "#fdb082", "#af4d44", "#a759c4", "#a9e03a", "#0d906b"]
 
     // let colorsPalette = d3.scaleSequential(d3.interpolateRdYlGn)
     for(let i = 0; i < sumstat.length; i++)
@@ -114,6 +145,26 @@ function drawVariableLines(g, sumstat)
         lineAndDots.selectAll("line-circle")
             .data(sumstat[i].values)
             .enter().append("circle")
+                .on('mouseover', function(d, i) {
+                    //console.log(d)
+                    d3.select(this).transition()
+                        .duration('50')
+                        .attr('opacity', '.85');
+                    divTooltip.transition()
+                        .duration(50)
+                        .style("opacity", 1);
+                        divTooltip.html(`Mobile Sensor: ${d[SENSOR_ID]} | Value: ${d["Value"]}`)
+                        .style("left", (d3.event.pageX + 10) + "px")
+                        .style("top", (d3.event.pageY - 15) + "px");
+                })
+                .on('mouseout', function(d, i) {
+                    d3.select(this).transition()
+                        .duration('50')
+                        .attr('opacity', '1');
+                    divTooltip.transition()
+                        .duration('50')
+                        .style("opacity", 0);
+                })
                 .attr("class", "proximity-line-and-dots")
                 .attr("transform", "translate(50," + (lineInnerHeight ) + ")")
                 .attr("class", "data-circle")
@@ -124,7 +175,7 @@ function drawVariableLines(g, sumstat)
     }
 }
 
-function drawBaseLine(g, staticSensorReadings)
+function drawBaseLine(g, staticSensorReadings, divTooltip)
 {
     let lineAndDots = g.append("g")
             .attr("class", "proximity-line-and-dots")
@@ -135,6 +186,7 @@ function drawBaseLine(g, staticSensorReadings)
                 .attr("class", "proximity-line-and-dots")
                 .attr("transform", "translate(50," + (lineInnerHeight ) + ")")
                 .datum(staticSensorReadings)
+                    
                 .attr("fill", "none")
                 .attr("stroke", "black")
                 .style("opacity", 1)
@@ -144,13 +196,34 @@ function drawBaseLine(g, staticSensorReadings)
                         .x(function(d, idx) { return timeXScale(new Date(d["Timestamp"])); } )
                         .y(function(d, idx) { return yScale(d["Value"]); } ));
 
+
         // Data dots
             // lineAndDots.selectAll("line-circle")
             //     .data(staticSensorReadings)
             //     .enter().append("circle")
+            //         .on('mouseover', function(d, i) {
+            //             d3.select(this).transition()
+            //                 .duration('50')
+            //                 .attr('opacity', '.85');
+            //             divTooltip.transition()
+            //                 .duration(50)
+            //                 .style("opacity", 1);
+            //                 divTooltip.html(`Static Sensor: ${d[SENSOR_ID]} | Value: ${d["Value"]}`)
+            //                 .style("left", (d3.event.pageX + 10) + "px")
+            //                 .style("top", (d3.event.pageY - 15) + "px");
+            //         })
+            //         .on('mouseout', function(d, i) {
+            //             d3.select(this).transition()
+            //                 .duration('50')
+            //                 .attr('opacity', '1');
+            //             divTooltip.transition()
+            //                 .duration('50')
+            //                 .style("opacity", 0);
+            //         })
             //         .attr("transform", "translate(100," + (lineInnerHeight ) + ")")
-            //         .attr("class", "data-circle")
-            //         .attr("r", 1.5)
+            //         // .attr("class", "data-circle")
+            //         .attr("r", 2)
+            //         .attr("fill", "transparent")
             //         .attr("cx", function(d, idx) {return timeXScale(new Date(d["Timestamp"])); })
             //         .attr("cy", function(d, idx) { return yScale(d["Value"]); } );
 }
