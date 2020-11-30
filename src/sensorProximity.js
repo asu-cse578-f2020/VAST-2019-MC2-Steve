@@ -50,7 +50,7 @@ function sensorProximity(staticSensorId, sensorProximitySVG, geoData, staticSens
     drawAxis(sensorProximitySVG);
     drawBaseLine(g, staticSensorReadings, divTooltip);
     drawVariableLines(g, sumstat, divTooltip);
-    drawLegend(g, sumstat);
+    // drawLegend(g, sumstat);
 
 
 
