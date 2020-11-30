@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
 
-  console.log("asdf");
+//   console.log("asdf");
     const FACTORY_GLYPH = "M456.723,121,328.193,248H312V121H291.3L166.084,248H152V32H32V480H480V121ZM172,432H132V392h40Zm0-80H132V312h40Zm80,80H212V392h40Zm0-80H212V312h40Zm80,80H292V392h40Zm0-80H292V312h40Zm80,80H372V392h40Zm0-80H372V312h40Z";
     const HOSPITAL_GLYPH = "M352,104V208H160V104H88V448H238V376h38v72H424V104ZM197,394H157V354h40Zm0-92H157V262h40Zm80,0H237V262h40Zm80,92H317V354h40Zm0-92H317V262h40ZM352,104V208H160V104H88V448H238V376h38v72H424V104ZM197,394H157V354h40Zm0-92H157V262h40Zm80,0H237V262h40Zm80,92H317V354h40Zm0-92H317V262h40Z";
     const MOBILE_SENSOR_IDX = [ 15, 22, 40,  1, 27, 30,  8, 41,  9, 37, 26, 16, 49, 13,  2, 31, 44,
@@ -30,11 +30,12 @@ document.addEventListener('DOMContentLoaded', function() {
                      .select(".static-select-picker");
 
 
-    STATIC_SENSOR_IDX.forEach(id => {
-      staticSelectpicker.append("option")
-                  .text("Static Sensor " + id)
-                  .attr("value", id);
-    });
+    // STATIC_SENSOR_IDX.forEach(id => {
+    //   staticSelectpicker.append("option")
+    //               .text("Static Sensor " + id)
+    //               .attr("value", id);
+    // });
+    
     var regionSelectPicker = d3.select(".navbar")
                                .select(".region-select-picker");
 
@@ -111,8 +112,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
         regionNameMappings.set(locationID, locationName);
       });
-
+      
       $('.region-select-picker').selectpicker('refresh');
+      
+
+      let staticSensorLocationMap = new Map();
+        //let sensorData = new Map();
+
+        staticSensorLocations.forEach(element => {
+            staticSensorLocationMap.set(element[SENSOR_ID], [element[LONG], element[LAT]]);
+        });
+
+        staticSensorReadings = staticSensorReadings.map(e => {
+            return {
+                ...e,
+                [CO_ORDINATES]: staticSensorLocationMap.get(e[SENSOR_ID]),
+                [LAT]: staticSensorLocationMap.get(e[SENSOR_ID])[1],
+                [LONG]: staticSensorLocationMap.get(e[SENSOR_ID])[0] 
+            }
+        });
+
+
+
+     
       // Hashmap for associating area ID with sensor-id { areaID: sensorID }
       var hashmap = new Map();
 
@@ -353,15 +375,15 @@ document.addEventListener('DOMContentLoaded', function() {
    }
 
 
-   function onRegionClick(d){
+    function onRegionClick(d){
 
         transitionLine(d.properties.Name);
-        filterMobileSensorsPerRegion(d.properties.Name, geoData, mobileSensorSelectPicker, mobileSensorReadings);
+        filterMobileSensorsPerRegion(d.properties.Name, geoData, mobileSensorSelectPicker, staticSelectpicker, mobileSensorReadings, staticSensorReadings);
     }
 
-    function filterMobileSensorsPerRegion(regionName, geoData,mobileSensorSelectPicker, mobileSensorReadings)
+    function filterMobileSensorsPerRegion(regionName, geoData,mobileSensorSelectPicker, staticSelectpicker,  mobileSensorReadings, staticSensorReadings)
     {
-        let mobileSensorSet = new Set();
+        let mobileSensorSet = new Set(), staticSensorSet = new Set();
         let currentGeoData = geoData.features.filter(d=> d.properties.Name===regionName)[0];
 
         mobileSensorReadings.forEach(reading => {
@@ -371,8 +393,18 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
+        // console.log(staticSensorReadings);
+
+        staticSensorReadings.forEach(reading => {
+            if (d3.geoContains(currentGeoData, [reading[LONG], reading[LAT]]))
+            {
+                staticSensorSet.add(reading[SENSOR_ID]);
+            }
+        });
+
 
         document.getElementById("mobile-sensor-id").innerHTML = "";
+        document.getElementById("static-sensor-id").innerHTML = "";
         // mobileSensorSelectPicker.empty();
         // let mobileSelect = d3.select(".mobile-select-picker");
         Array.from(mobileSensorSet).forEach(id => {
@@ -381,8 +413,18 @@ document.addEventListener('DOMContentLoaded', function() {
                                     .text("Mobile Sensor " + id)
                                     .attr("value", id);
         });
+
+        Array.from(staticSensorSet).forEach(id => {
+            // console.log(id);
+            staticSelectpicker.append("option")
+                                    .text("Static Sensor " + id)
+                                    .attr("value", id);
+        });
+
         $('.mobile-select-picker').selectpicker('refresh');
+        $('.static-select-picker').selectpicker('refresh');
         // console.log(mobileSensorSet);
+        // console.log(staticSensorSet);
     }
 
   } // End of drawMap function
