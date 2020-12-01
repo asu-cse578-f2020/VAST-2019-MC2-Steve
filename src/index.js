@@ -350,6 +350,7 @@ document.addEventListener('DOMContentLoaded', function() {
     .on("change", function() {
       d3.select(".mobile-sensors").remove().exit();
       drawMobileSensors(map, mapProjection, mobileSensorReadings, this.value, MOBILE_SENSOR_GLYPH);
+      d3.select(".mobile-sensor-proximity-chart-header").html("<h5 class='card-header'> Mobile Sensor Proximity wrt Mobile Sensor " + this.value + "</h5 ");
       mobileSensorProximity(this.value, mobileSensorProximitySVG, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings);
 
    });
