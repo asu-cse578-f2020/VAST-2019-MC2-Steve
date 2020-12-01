@@ -36,8 +36,8 @@ document.addEventListener('DOMContentLoaded', function() {
     //               .attr("value", id);
     // });
 
-    var regionSelectPicker = d3.select(".navbar")
-                               .select(".region-select-picker");
+    // var regionSelectPicker = d3.select(".navbar")
+    //                            .select(".region-select-picker");
 
 
     // Define the div for the tooltip
@@ -105,9 +105,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         //console.log(d);
         // Populate the region select picker with region names
-        regionSelectPicker.append("option")
-                          .text(locationName)
-                          .attr("value", locationID);
+        // regionSelectPicker.append("option")
+        //                   .text(locationName)
+        //                   .attr("value", locationID);
         //console.log(regionSelectPicker);
 
         regionNameMappings.set(locationID, locationName);
@@ -156,24 +156,25 @@ document.addEventListener('DOMContentLoaded', function() {
       });
 
 
+
       // Radiation Measurements for each static sensor
       radiationMeasurements = new Map();
       staticSensorLocations.forEach(d => {
-       let sensorID = d["Sensor-id"];
-       let tempMap = new Map();
-       tempMap.set("readings", []);
-       tempMap.set("timestamps", []);
-       radiationMeasurements.set(sensorID, tempMap);
+        let sensorID = d["Sensor-id"];
+        let tempMap = new Map();
+        tempMap.set("readings", []);
+        tempMap.set("timestamps", []);
+        radiationMeasurements.set(sensorID, tempMap);
 
-       // Get data for the current sensor
-       let curr = staticSensorReadings.filter(x => {
-         return x["Sensor-id"] == sensorID;
-       });
+        // Get data for the current sensor
+        let curr = staticSensorReadings.filter(x => {
+            return x["Sensor-id"] == sensorID;
+        });
 
-       curr.forEach( x => {
-         radiationMeasurements.get(sensorID).get("readings").push(parseFloat(x.Value));
-         radiationMeasurements.get(sensorID).get("timestamps").push(x.Timestamp);
-       });
+        curr.forEach( x => {
+            radiationMeasurements.get(sensorID).get("readings").push(parseFloat(x.Value));
+            radiationMeasurements.get(sensorID).get("timestamps").push(x.Timestamp);
+        });
      });
 
       var regionFreqArray = drawBarChart(barChart, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings);
@@ -198,6 +199,7 @@ document.addEventListener('DOMContentLoaded', function() {
                    .attr("d", geoPath)
                    .style("fill", d => { return geoMapColorScale(regionFreqDict[d.properties.Name]); })
                    .style("stroke", "white")
+                   .attr("data-regionID", d=>d.properties.Id)
                    .on("mouseover", function(d) {
                      d3.select(this).style("stroke", "white").attr("stroke-width", 10);
                    })
@@ -205,7 +207,31 @@ document.addEventListener('DOMContentLoaded', function() {
                      d3.select(this).style("stroke", "white").attr("stroke-width", 1);
                    })
                    .on("click", function(d) {
-                        onRegionClick(d);
+    
+                        let regionID = parseInt(d3.select(this).attr("data-regionID"));
+                        transitionLine(d.properties.Name);
+                        filterMobileSensorsPerRegion(d.properties.Name, geoData, mobileSensorSelectPicker, staticSelectpicker, mobileSensorReadings, staticSensorReadings);
+
+                        $("#sensorReadingsModal").modal("toggle");
+                        // let regionID = parseInt(this.value);
+                        let modal = d3.select("#sensorReadingsModal");
+
+                        // Remove all the child nodes of lineSvg.
+                        d3.select(".staticSensorLineChart").selectAll("g").remove();
+
+                        if (hashmap.has(regionID)) {
+                        let keys = hashmap.get(regionID);
+                        drawLineChart(lineSvg, radiationMeasurements, keys, toolTipDiv);
+                        let peakValues = getPeakValueTimestamp(radiationMeasurements, keys);
+                        modal.select(".modal-title").html("<span style='font-size: 1.5rem; font-weight: bolder'> " + regionNameMappings.get(regionID) + " </span> &nbsp; &nbsp; &nbsp; <span class='badge badge-pill badge-dark' style='font-size: 0.9rem;'>Peak Value: " + peakValues[0] + " </span> &nbsp; &nbsp; &nbsp; <span class='badge badge-pill badge-dark' style='font-size: 0.9rem;'>Timestamp: " + peakValues[1] + "</span>");
+                        }
+                        else {
+                        modal.select(".modal-title").html("<span style='font-size: 1.5rem; font-weight: bolder'> " + regionNameMappings.get(regionID) + " </span> &nbsp; &nbsp; &nbsp; <span style='font-size: 0.9rem;'> No static sensors exist in this region. </span>");
+                        }
+
+                        // Draw the circular heatmap
+                        drawCircularHeat(heat, regionID, geoData, mobileSensorReadings, staticSensorReadings);
+                        d3.select(".heat-chart-header").html("<h5 class='card-header'> Circular Heat Chart: " + regionNameMappings.get(regionID) + "</h5 ");
                    });
 
 
@@ -342,43 +368,42 @@ document.addEventListener('DOMContentLoaded', function() {
 
    });
 
-   d3.select("#region-id")
-   .on("change", function() {
+//    d3.select("#region-id")
+//    .on("change", function() {
 
-     $("#sensorReadingsModal").modal("toggle");
-     let regionID = parseInt(this.value);
-     let modal = d3.select("#sensorReadingsModal");
+//      $("#sensorReadingsModal").modal("toggle");
+//      let regionID = parseInt(this.value);
+//      let modal = d3.select("#sensorReadingsModal");
 
-     // Remove all the child nodes of lineSvg.
-     d3.select(".staticSensorLineChart").selectAll("g").remove();
+//      // Remove all the child nodes of lineSvg.
+//      d3.select(".staticSensorLineChart").selectAll("g").remove();
 
-     if (hashmap.has(regionID)) {
-       let keys = hashmap.get(regionID);
-       drawLineChart(lineSvg, radiationMeasurements, keys, toolTipDiv);
-       let peakValues = getPeakValueTimestamp(radiationMeasurements, keys);
-       modal.select(".modal-title").html("<span style='font-size: 1.5rem; font-weight: bolder'> " + regionNameMappings.get(regionID) + " </span> &nbsp; &nbsp; &nbsp; <span class='badge badge-pill badge-dark' style='font-size: 0.9rem;'>Peak Value: " + peakValues[0] + " </span> &nbsp; &nbsp; &nbsp; <span class='badge badge-pill badge-dark' style='font-size: 0.9rem;'>Timestamp: " + peakValues[1] + "</span>");
-    }
-    else {
-      modal.select(".modal-title").html("<span style='font-size: 1.5rem; font-weight: bolder'> " + regionNameMappings.get(regionID) + " </span> &nbsp; &nbsp; &nbsp; <span style='font-size: 0.9rem;'> No static sensors exist in this region. </span>");
-    }
+//      if (hashmap.has(regionID)) {
+//        let keys = hashmap.get(regionID);
+//        drawLineChart(lineSvg, radiationMeasurements, keys, toolTipDiv);
+//        let peakValues = getPeakValueTimestamp(radiationMeasurements, keys);
+//        modal.select(".modal-title").html("<span style='font-size: 1.5rem; font-weight: bolder'> " + regionNameMappings.get(regionID) + " </span> &nbsp; &nbsp; &nbsp; <span class='badge badge-pill badge-dark' style='font-size: 0.9rem;'>Peak Value: " + peakValues[0] + " </span> &nbsp; &nbsp; &nbsp; <span class='badge badge-pill badge-dark' style='font-size: 0.9rem;'>Timestamp: " + peakValues[1] + "</span>");
+//     }
+//     else {
+//       modal.select(".modal-title").html("<span style='font-size: 1.5rem; font-weight: bolder'> " + regionNameMappings.get(regionID) + " </span> &nbsp; &nbsp; &nbsp; <span style='font-size: 0.9rem;'> No static sensors exist in this region. </span>");
+//     }
 
-    // Draw the circular heatmap
-    drawCircularHeat(heat, regionID, geoData, mobileSensorReadings, staticSensorReadings);
-    d3.select(".heat-chart-header").html("<h5 class='card-header'> Circular Heat Chart: " + regionNameMappings.get(regionID) + "</h5 ");
-  });
+//     // Draw the circular heatmap
+//     drawCircularHeat(heat, regionID, geoData, mobileSensorReadings, staticSensorReadings);
+//     d3.select(".heat-chart-header").html("<h5 class='card-header'> Circular Heat Chart: " + regionNameMappings.get(regionID) + "</h5 ");
+//   });
 
-   // Updates the timestamp on map header
-   function getMapHeaderTimestamp(index, sensorID) {
-     let timestamp = radiationMeasurements.get(sensorID).get("timestamps")[index];
-     d3.select(".map-header").html("<h5 class='card-header'> St. Himark Map &nbsp; &nbsp;  <span class='badge badge-pill badge-dark'>Timestamp: " + timestamp + ":00</span> </h5 ");
-   }
+//    // Updates the timestamp on map header
+//    function getMapHeaderTimestamp(index, sensorID) {
+//      let timestamp = radiationMeasurements.get(sensorID).get("timestamps")[index];
+//      d3.select(".map-header").html("<h5 class='card-header'> St. Himark Map &nbsp; &nbsp;  <span class='badge badge-pill badge-dark'>Timestamp: " + timestamp + ":00</span> </h5 ");
+//    }
 
 
-    function onRegionClick(d){
+    // function onRegionClick(d){
 
-        transitionLine(d.properties.Name);
-        filterMobileSensorsPerRegion(d.properties.Name, geoData, mobileSensorSelectPicker, staticSelectpicker, mobileSensorReadings, staticSensorReadings);
-    }
+        
+    // }
 
     function filterMobileSensorsPerRegion(regionName, geoData,mobileSensorSelectPicker, staticSelectpicker,  mobileSensorReadings, staticSensorReadings)
     {
