@@ -1,23 +1,60 @@
+const FACTORY_GLYPH = "M456.723,121,328.193,248H312V121H291.3L166.084,248H152V32H32V480H480V121ZM172,432H132V392h40Zm0-80H132V312h40Zm80,80H212V392h40Zm0-80H212V312h40Zm80,80H292V392h40Zm0-80H292V312h40Zm80,80H372V392h40Zm0-80H372V312h40Z";
+const HOSPITAL_GLYPH = "M352,104V208H160V104H88V448H238V376h38v72H424V104ZM197,394H157V354h40Zm0-92H157V262h40Zm80,0H237V262h40Zm80,92H317V354h40Zm0-92H317V262h40ZM352,104V208H160V104H88V448H238V376h38v72H424V104ZM197,394H157V354h40Zm0-92H157V262h40Zm80,0H237V262h40Zm80,92H317V354h40Zm0-92H317V262h40Z";
+const MOBILE_SENSOR_IDX = [ 15, 22, 40,  1, 27, 30,  8, 41,  9, 37, 26, 16, 49, 13,  2, 31, 44,
+                    6, 43, 14, 11, 23, 32,  3,  5, 35, 24,  4, 34, 45, 47, 39, 19, 29,
+                    38, 12, 33, 17, 46, 10,  7, 18, 20, 50, 28, 48, 36, 25, 42, 21 ];
+const STATIC_SENSOR_IDX = [12, 15, 13, 11, 6, 1, 9, 14, 4];
+
 document.addEventListener('DOMContentLoaded', function() {
 
 //   console.log("asdf");
-    const FACTORY_GLYPH = "M456.723,121,328.193,248H312V121H291.3L166.084,248H152V32H32V480H480V121ZM172,432H132V392h40Zm0-80H132V312h40Zm80,80H212V392h40Zm0-80H212V312h40Zm80,80H292V392h40Zm0-80H292V312h40Zm80,80H372V392h40Zm0-80H372V312h40Z";
-    const HOSPITAL_GLYPH = "M352,104V208H160V104H88V448H238V376h38v72H424V104ZM197,394H157V354h40Zm0-92H157V262h40Zm80,0H237V262h40Zm80,92H317V354h40Zm0-92H317V262h40ZM352,104V208H160V104H88V448H238V376h38v72H424V104ZM197,394H157V354h40Zm0-92H157V262h40Zm80,0H237V262h40Zm80,92H317V354h40Zm0-92H317V262h40Z";
-    const MOBILE_SENSOR_IDX = [ 15, 22, 40,  1, 27, 30,  8, 41,  9, 37, 26, 16, 49, 13,  2, 31, 44,
-                     6, 43, 14, 11, 23, 32,  3,  5, 35, 24,  4, 34, 45, 47, 39, 19, 29,
-                     38, 12, 33, 17, 46, 10,  7, 18, 20, 50, 28, 48, 36, 25, 42, 21 ];
-    const STATIC_SENSOR_IDX = [12, 15, 13, 11, 6, 1, 9, 14, 4];
+    
+    var dateSelectPicker = d3.select(".navbar")
+        .select("#date-select-id");
+    var selectpicker = d3.select(".navbar")
+    .select(".mobile-select-picker");
+    var mobileSensorSelectPicker = d3.select(".navbar")
+                    .select("#mobile-sensor-id");
+
+    var staticSelectpicker = d3.select(".navbar")
+                    .select(".static-select-picker");
+
+    
+
+    d3.queue()
+      .defer(d3.json, "data/StHimark.json")
+      .defer(d3.csv, "data/StaticSensorLocations.csv")
+      .defer(d3.csv, "data/StaticSensorReadingsAggregate.csv")
+      .defer(d3.csv, "data/MobileSensorReadingsAggregate.csv")
+      .defer(d3.csv, "data/HospitalLocations.csv")
+      .await(drawMap);
 
 
+    function drawMap(error, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings, hospitalLocations) {
 
+        if (error) console.log(error);
+
+        d3.select("#date-select-id")
+            .on("change", function(d) {
+                
+                console.log(d3.select("#date-select-id").node().value)
+
+        });
+
+        drawMapUtil(geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings, hospitalLocations);
+
+    } // End of drawMap function
+
+  function drawMapUtil(geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings, hospitalLocations)
+  {
     STATIC_SENSOR_IDX.sort((a,b)=>a-b);
     MOBILE_SENSOR_IDX.sort((a,b)=>a-b);
 
     // Populate the mobile sensor dropdown
-    var selectpicker = d3.select(".navbar")
-                     .select(".mobile-select-picker");
-    var mobileSensorSelectPicker = d3.select(".navbar")
-                                     .select("#mobile-sensor-id");
+    // var selectpicker = d3.select(".navbar")
+    //                  .select(".mobile-select-picker");
+    // var mobileSensorSelectPicker = d3.select(".navbar")
+    //                                  .select("#mobile-sensor-id");
 
 
     // MOBILE_SENSOR_IDX.forEach(id => {
@@ -26,8 +63,8 @@ document.addEventListener('DOMContentLoaded', function() {
     //                           .attr("value", id);
     // });
 
-    var staticSelectpicker = d3.select(".navbar")
-                     .select(".static-select-picker");
+    // var staticSelectpicker = d3.select(".navbar")
+    //                  .select(".static-select-picker");
 
 
     // STATIC_SENSOR_IDX.forEach(id => {
@@ -39,6 +76,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // var regionSelectPicker = d3.select(".navbar")
     //                            .select(".region-select-picker");
 
+   
+    
 
     // Define the div for the tooltip
     var toolTipDiv;
@@ -83,20 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var geoPath = d3.geoPath().projection(mapProjection);
 
-
-    d3.queue()
-      .defer(d3.json, "data/StHimark.json")
-      .defer(d3.csv, "data/StaticSensorLocations.csv")
-      .defer(d3.csv, "data/StaticSensorReadingsAggregate.csv")
-      .defer(d3.csv, "data/MobileSensorReadingsAggregate.csv")
-      .defer(d3.csv, "data/HospitalLocations.csv")
-      .await(drawMap);
-
-
-    function drawMap(error, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings, hospitalLocations) {
-
-      if (error) console.log(error);
-
+    
       var regionNameMappings = new Map();
 
       geoData.features.forEach(d => {
@@ -394,10 +420,10 @@ document.addEventListener('DOMContentLoaded', function() {
 //   });
 
 //    // Updates the timestamp on map header
-//    function getMapHeaderTimestamp(index, sensorID) {
-//      let timestamp = radiationMeasurements.get(sensorID).get("timestamps")[index];
-//      d3.select(".map-header").html("<h5 class='card-header'> St. Himark Map &nbsp; &nbsp;  <span class='badge badge-pill badge-dark'>Timestamp: " + timestamp + ":00</span> </h5 ");
-//    }
+   function getMapHeaderTimestamp(index, sensorID) {
+     let timestamp = radiationMeasurements.get(sensorID).get("timestamps")[index];
+     d3.select(".map-header").html("<h5 class='card-header'> St. Himark Map &nbsp; &nbsp;  <span class='badge badge-pill badge-dark'>Timestamp: " + timestamp + ":00</span> </h5 ");
+   }
 
 
     // function onRegionClick(d){
@@ -450,8 +476,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // console.log(mobileSensorSet);
         // console.log(staticSensorSet);
     }
-
-  } // End of drawMap function
+  }
 
 
 
