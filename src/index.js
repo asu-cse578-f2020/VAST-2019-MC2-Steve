@@ -4,6 +4,7 @@ const MOBILE_SENSOR_IDX = [ 15, 22, 40,  1, 27, 30,  8, 41,  9, 37, 26, 16, 49, 
                     6, 43, 14, 11, 23, 32,  3,  5, 35, 24,  4, 34, 45, 47, 39, 19, 29,
                     38, 12, 33, 17, 46, 10,  7, 18, 20, 50, 28, 48, 36, 25, 42, 21 ];
 const STATIC_SENSOR_IDX = [12, 15, 13, 11, 6, 1, 9, 14, 4];
+const MOBILE_SENSOR_GLYPH = "M256.6,17.236c-132.217,0-239.4,107.182-239.4,239.4s107.182,239.4,239.4,239.4S496,388.852,496,256.635,388.817,17.236,256.6,17.236ZM398.933,220.262l-64.069,64.586,13.87,89.911a8,8,0,0,1-11.51,8.362L256,342.146l-81.224,40.975a8,8,0,0,1-11.51-8.362l13.87-89.911-64.069-64.586a8,8,0,0,1,4.4-13.531l89.795-14.593,41.628-80.891a8,8,0,0,1,14.226,0l41.628,80.891,89.8,14.593A8,8,0,0,1,398.933,220.262Z";
 
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -278,7 +279,7 @@ document.addEventListener('DOMContentLoaded', function() {
                      d3.select(this).style("stroke", "black").attr("stroke-width", 1);
                    })
                    .on("click", function(d) {
-    
+
                         let regionID = parseInt(d3.select(this).attr("data-regionID"));
                         transitionLine(d.properties.Name);
                         filterMobileSensorsPerRegion(d.properties.Name, geoData, mobileSensorSelectPicker, staticSelectpicker, mobileSensorReadings, staticSensorReadings);
@@ -419,7 +420,8 @@ document.addEventListener('DOMContentLoaded', function() {
    d3.select("#mobile-sensor-id")
     .on("change", function() {
       d3.select(".mobile-sensors").remove().exit();
-      drawMobileSensors(map, mapProjection, mobileSensorReadings, this.value);
+      drawMobileSensors(map, mapProjection, mobileSensorReadings, this.value, MOBILE_SENSOR_GLYPH);
+      d3.select(".mobile-sensor-proximity-chart-header").html("<h5 class='card-header'> Mobile Sensor Proximity wrt Mobile Sensor " + this.value + "</h5 ");
       mobileSensorProximity(this.value, mobileSensorProximitySVG, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings);
 
    });
@@ -473,7 +475,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // function onRegionClick(d){
 
-        
+
     // }
 
     function filterMobileSensorsPerRegion(regionName, geoData,mobileSensorSelectPicker, staticSelectpicker,  mobileSensorReadings, staticSensorReadings)
@@ -577,6 +579,19 @@ document.addEventListener('DOMContentLoaded', function() {
         .attr("d", HOSPITAL_GLYPH)
         .attr("transform", "translate(10, 370)scale(0.05)")
         .style("fill", "black");
+
+    map.append("path")
+       .attr("d", MOBILE_SENSOR_GLYPH)
+       .attr("transform", "translate(10, 330)scale(0.045)")
+       .style("fill", "#6300b6");
+
+    map.append("svg:text")
+       .attr("transform", "translate(112, 345)")
+       .text("Mobile Sensor")
+       .attr("text-anchor", "end")
+       .attr("fill", "black")
+       .style("font-size", "12px");
+
 
     const axis = d3.scaleLog()
                    .domain([ 2000, 7994 ])

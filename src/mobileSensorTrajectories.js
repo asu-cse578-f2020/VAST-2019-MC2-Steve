@@ -1,6 +1,6 @@
-function drawMobileSensors(map, mapProjection, mobileSensorReadings, sensor_id) {
+function drawMobileSensors(map, mapProjection, mobileSensorReadings, sensor_id, MOBILE_SENSOR_GLYPH) {
 
-  const SENSOR_GLYPH = "M256.6,17.236c-132.217,0-239.4,107.182-239.4,239.4s107.182,239.4,239.4,239.4S496,388.852,496,256.635,388.817,17.236,256.6,17.236ZM398.933,220.262l-64.069,64.586,13.87,89.911a8,8,0,0,1-11.51,8.362L256,342.146l-81.224,40.975a8,8,0,0,1-11.51-8.362l13.87-89.911-64.069-64.586a8,8,0,0,1,4.4-13.531l89.795-14.593,41.628-80.891a8,8,0,0,1,14.226,0l41.628,80.891,89.8,14.593A8,8,0,0,1,398.933,220.262Z";
+  //const MOBILE_SENSOR_GLYPH = "M256.6,17.236c-132.217,0-239.4,107.182-239.4,239.4s107.182,239.4,239.4,239.4S496,388.852,496,256.635,388.817,17.236,256.6,17.236ZM398.933,220.262l-64.069,64.586,13.87,89.911a8,8,0,0,1-11.51,8.362L256,342.146l-81.224,40.975a8,8,0,0,1-11.51-8.362l13.87-89.911-64.069-64.586a8,8,0,0,1,4.4-13.531l89.795-14.593,41.628-80.891a8,8,0,0,1,14.226,0l41.628,80.891,89.8,14.593A8,8,0,0,1,398.933,220.262Z";
 
   var values = new Map();
 
@@ -27,7 +27,7 @@ function drawMobileSensors(map, mapProjection, mobileSensorReadings, sensor_id) 
   g.append("g")
      .attr("class", "mobile-sensor-15")
      .append("path")
-     .attr("d", SENSOR_GLYPH)
+     .attr("d", MOBILE_SENSOR_GLYPH)
      .attr("transform", "translate(" + mapProjection(values.get(sensor_id).get("locations")[0])[0] + ", " + mapProjection(values.get(sensor_id).get("locations")[0])[1] + ")scale(0.045)")
      .style("fill", "#6300b6");
 
