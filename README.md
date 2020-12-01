@@ -11,3 +11,14 @@ This will run the application on your localhost:8000
 ```
 D3 Version: V4
 ```
+
+Group Members:
+
+```
+Mit Patel 
+Heet Dave 
+Henil Patel 
+Steve Jadav 
+Nelson Dantis 
+Hardik Sardhara
+```
