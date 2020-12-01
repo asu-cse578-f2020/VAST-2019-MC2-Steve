@@ -1,89 +1,26 @@
+const FACTORY_GLYPH = "M456.723,121,328.193,248H312V121H291.3L166.084,248H152V32H32V480H480V121ZM172,432H132V392h40Zm0-80H132V312h40Zm80,80H212V392h40Zm0-80H212V312h40Zm80,80H292V392h40Zm0-80H292V312h40Zm80,80H372V392h40Zm0-80H372V312h40Z";
+const HOSPITAL_GLYPH = "M352,104V208H160V104H88V448H238V376h38v72H424V104ZM197,394H157V354h40Zm0-92H157V262h40Zm80,0H237V262h40Zm80,92H317V354h40Zm0-92H317V262h40ZM352,104V208H160V104H88V448H238V376h38v72H424V104ZM197,394H157V354h40Zm0-92H157V262h40Zm80,0H237V262h40Zm80,92H317V354h40Zm0-92H317V262h40Z";
+const MOBILE_SENSOR_IDX = [ 15, 22, 40,  1, 27, 30,  8, 41,  9, 37, 26, 16, 49, 13,  2, 31, 44,
+                    6, 43, 14, 11, 23, 32,  3,  5, 35, 24,  4, 34, 45, 47, 39, 19, 29,
+                    38, 12, 33, 17, 46, 10,  7, 18, 20, 50, 28, 48, 36, 25, 42, 21 ];
+const STATIC_SENSOR_IDX = [12, 15, 13, 11, 6, 1, 9, 14, 4];
+const MOBILE_SENSOR_GLYPH = "M256.6,17.236c-132.217,0-239.4,107.182-239.4,239.4s107.182,239.4,239.4,239.4S496,388.852,496,256.635,388.817,17.236,256.6,17.236ZM398.933,220.262l-64.069,64.586,13.87,89.911a8,8,0,0,1-11.51,8.362L256,342.146l-81.224,40.975a8,8,0,0,1-11.51-8.362l13.87-89.911-64.069-64.586a8,8,0,0,1,4.4-13.531l89.795-14.593,41.628-80.891a8,8,0,0,1,14.226,0l41.628,80.891,89.8,14.593A8,8,0,0,1,398.933,220.262Z";
+
 document.addEventListener('DOMContentLoaded', function() {
 
 //   console.log("asdf");
-    const FACTORY_GLYPH = "M456.723,121,328.193,248H312V121H291.3L166.084,248H152V32H32V480H480V121ZM172,432H132V392h40Zm0-80H132V312h40Zm80,80H212V392h40Zm0-80H212V312h40Zm80,80H292V392h40Zm0-80H292V312h40Zm80,80H372V392h40Zm0-80H372V312h40Z";
-    const HOSPITAL_GLYPH = "M352,104V208H160V104H88V448H238V376h38v72H424V104ZM197,394H157V354h40Zm0-92H157V262h40Zm80,0H237V262h40Zm80,92H317V354h40Zm0-92H317V262h40ZM352,104V208H160V104H88V448H238V376h38v72H424V104ZM197,394H157V354h40Zm0-92H157V262h40Zm80,0H237V262h40Zm80,92H317V354h40Zm0-92H317V262h40Z";
-    const MOBILE_SENSOR_GLYPH = "M256.6,17.236c-132.217,0-239.4,107.182-239.4,239.4s107.182,239.4,239.4,239.4S496,388.852,496,256.635,388.817,17.236,256.6,17.236ZM398.933,220.262l-64.069,64.586,13.87,89.911a8,8,0,0,1-11.51,8.362L256,342.146l-81.224,40.975a8,8,0,0,1-11.51-8.362l13.87-89.911-64.069-64.586a8,8,0,0,1,4.4-13.531l89.795-14.593,41.628-80.891a8,8,0,0,1,14.226,0l41.628,80.891,89.8,14.593A8,8,0,0,1,398.933,220.262Z";
-    const MOBILE_SENSOR_IDX = [ 15, 22, 40,  1, 27, 30,  8, 41,  9, 37, 26, 16, 49, 13,  2, 31, 44,
-                     6, 43, 14, 11, 23, 32,  3,  5, 35, 24,  4, 34, 45, 47, 39, 19, 29,
-                     38, 12, 33, 17, 46, 10,  7, 18, 20, 50, 28, 48, 36, 25, 42, 21 ];
-    const STATIC_SENSOR_IDX = [12, 15, 13, 11, 6, 1, 9, 14, 4];
-
-
-
-    STATIC_SENSOR_IDX.sort((a,b)=>a-b);
-    MOBILE_SENSOR_IDX.sort((a,b)=>a-b);
-
-    // Populate the mobile sensor dropdown
+    
+    var dateSelectPicker = d3.select(".navbar")
+        .select("#date-select-id");
     var selectpicker = d3.select(".navbar")
-                     .select(".mobile-select-picker");
+    .select(".mobile-select-picker");
     var mobileSensorSelectPicker = d3.select(".navbar")
-                                     .select("#mobile-sensor-id");
-
-
-    // MOBILE_SENSOR_IDX.forEach(id => {
-    //   mobileSensorSelectPicker.append("option")
-    //                           .text("Mobile Sensor " + id)
-    //                           .attr("value", id);
-    // });
+                    .select("#mobile-sensor-id");
 
     var staticSelectpicker = d3.select(".navbar")
-                     .select(".static-select-picker");
+                    .select(".static-select-picker");
 
-
-    // STATIC_SENSOR_IDX.forEach(id => {
-    //   staticSelectpicker.append("option")
-    //               .text("Static Sensor " + id)
-    //               .attr("value", id);
-    // });
-
-    // var regionSelectPicker = d3.select(".navbar")
-    //                            .select(".region-select-picker");
-
-
-    // Define the div for the tooltip
-    var toolTipDiv;
-    toolTipDiv = d3.select("body")
-                 .append("div")
-                 .attr("class", "tooltip")
-                 .style("opacity", 0);
-
-    var parseTime = d3.timeParse("%Y-%m-%d %H:%M:%S");
-    var alwaysSafePlantLocation = [ -119.784825, 0.162679 ];
-
-    var lineSvg = d3.select(".staticSensorLineChart")
-                    .attr("width", 1110)
-                    .attr("height", 240);
-
-    var map = d3.select(".map")
-                .attr("width", 575)
-                .attr("height", 550);
-
-    var barChart = d3.select(".barChart")
-                .attr("width", 610)
-                .attr("height", 550);
-
-    var heat = d3.select(".heat")
-        .attr("width", 460)
-        .attr("height", 460);
-
-    var sensorProximitySVG = d3.select(".sensorProximity")
-                .attr("width", 1110)
-                .attr("height", 750);
-
-    var mobileSensorProximitySVG = d3.select(".mobileSensorProximity")
-                .attr("width", 1264)
-                .attr("height", 750);
-
-
-    // Setting projection parameters
-    var mapProjection = d3.geoMercator()
-                          .scale(120000)
-                          .center([ -119.87500, 0.113 ])
-                          .translate([ 220, 250 ]);
-
-    var geoPath = d3.geoPath().projection(mapProjection);
-
+    
 
     d3.queue()
       .defer(d3.json, "data/StHimark.json")
@@ -96,8 +33,141 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function drawMap(error, geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings, hospitalLocations) {
 
-      if (error) console.log(error);
+        if (error) console.log(error);
+        //console.log(staticSensorReadings, mobileSensorReadings);
+        d3.select("#date-select-id")
+            .on("change", function(d) {
+                
+                let selectedDateOption = d3.select("#date-select-id").node().value;
+                d3.selectAll(".VASTMC2").remove();
+                //svg.selectAll("*").remove();
+                //d3.select("svg").remove();
+                // d3.select(".VASTMC2").selectAll("*").remove();
+                if(selectedDateOption==="clear-date")
+                {
+                    drawMapUtil(geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings, hospitalLocations);
+                }
+                else
+                {
+                    let date = new Date(selectedDateOption);
+                    let nextDate = new Date(date.toLocaleDateString());
+                    nextDate.setDate(nextDate.getDate() + 1);
+                    const TIMESTAMP = "Timestamp";
 
+                    function dateFilter(d)
+                    {
+                        let curr = new Date(d[TIMESTAMP]);
+
+                        return curr>=date && curr<nextDate;
+                    }   
+                    
+                    // let filteredStaticSensorReading = staticSensorReadings.filter(dateFilter);
+
+                    drawMapUtil(geoData, staticSensorLocations, staticSensorReadings.filter(dateFilter), mobileSensorReadings.filter(dateFilter), hospitalLocations, staticSensorReadings, mobileSensorReadings);
+                }
+
+        });
+
+        drawMapUtil(geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings, hospitalLocations, staticSensorReadings, mobileSensorReadings);
+
+    } // End of drawMap function
+
+  function drawMapUtil(geoData, staticSensorLocations, staticSensorReadings, mobileSensorReadings, hospitalLocations, staticSensorReadingsOriginal, mobileSensorReadingsOriginal)
+  {
+
+    // $('.mobile-select-picker').selectpicker('refresh');
+    // $('.static-select-picker').selectpicker('refresh');
+    // $("#mobile-sensor-id").removeAttr("selected");
+    // $("#static-sensor-id").removeAttr("selected");
+    // $("option:selected").removeAttr("selected");
+    // document.getElementById("ddBusinessCategory").value = "";
+    console.log("CALLED DRAW UTIL", staticSensorReadings, mobileSensorReadings, staticSensorReadingsOriginal, mobileSensorReadingsOriginal);
+    STATIC_SENSOR_IDX.sort((a,b)=>a-b);
+    MOBILE_SENSOR_IDX.sort((a,b)=>a-b);
+
+    // Populate the mobile sensor dropdown
+    // var selectpicker = d3.select(".navbar")
+    //                  .select(".mobile-select-picker");
+    // var mobileSensorSelectPicker = d3.select(".navbar")
+    //                                  .select("#mobile-sensor-id");
+
+
+    // MOBILE_SENSOR_IDX.forEach(id => {
+    //   mobileSensorSelectPicker.append("option")
+    //                           .text("Mobile Sensor " + id)
+    //                           .attr("value", id);
+    // });
+
+    // var staticSelectpicker = d3.select(".navbar")
+    //                  .select(".static-select-picker");
+
+
+    // STATIC_SENSOR_IDX.forEach(id => {
+    //   staticSelectpicker.append("option")
+    //               .text("Static Sensor " + id)
+    //               .attr("value", id);
+    // });
+
+    // var regionSelectPicker = d3.select(".navbar")
+    //                            .select(".region-select-picker");
+
+   
+    
+    
+    // Define the div for the tooltip
+    var toolTipDiv;
+    toolTipDiv = d3.select("body")
+                 .append("div")
+                 .attr("class", "tooltip VASTMC3")
+                 .style("opacity", 0);
+
+    var parseTime = d3.timeParse("%Y-%m-%d %H:%M:%S");
+    var alwaysSafePlantLocation = [ -119.784825, 0.162679 ];
+
+    var lineSvg = d3.select(".staticSensorLineChart")
+                    .attr("width", 1110)
+                    .attr("height", 240);
+
+    var map = d3.select("#map-svg-div")
+                .append("svg")
+                .attr("class", "map VASTMC2")
+                .attr("width", 575)
+                .attr("height", 550);
+
+    var barChart = d3.select("#barchart-svg-div")
+                .append("svg")
+                .attr("class", "barChart VASTMC2")
+                .attr("width", 610)
+                .attr("height", 550);
+
+    var heat = d3.select(".heat")
+        // .append("svg")
+        // .attr("class", "heat VASTMC2")
+        .attr("width", 460)
+        .attr("height", 460);
+
+    var sensorProximitySVG = d3.select("#sensorproximity-svg-div")
+                    .append("svg")
+                    .attr("class", "sensorProximity VASTMC2")
+                .attr("width", 1110)
+                .attr("height", 750);
+
+    var mobileSensorProximitySVG = d3.select("#mobileproximity-svg-div")
+                .append("svg")
+                .attr("class", "mobileSensorProximity VASTMC2")
+                .attr("width", 1264)
+                .attr("height", 750);
+
+
+    // Setting projection parameters
+    var mapProjection = d3.geoMercator()
+                          .scale(120000)
+                          .center([ -119.87500, 0.113 ])
+                          .translate([ 220, 250 ]);
+
+    var geoPath = d3.geoPath().projection(mapProjection);
+
+    
       var regionNameMappings = new Map();
 
       geoData.features.forEach(d => {
@@ -198,14 +268,15 @@ document.addEventListener('DOMContentLoaded', function() {
                    .enter()
                    .append("path")
                    .attr("d", geoPath)
+                   .attr("class", "VASTMC3")
                    .style("fill", d => { return geoMapColorScale(regionFreqDict[d.properties.Name]); })
-                   .style("stroke", "white")
+                   .style("stroke", "black")
                    .attr("data-regionID", d=>d.properties.Id)
                    .on("mouseover", function(d) {
                      d3.select(this).style("stroke", "white").attr("stroke-width", 10);
                    })
                    .on("mouseout", function(d) {
-                     d3.select(this).style("stroke", "white").attr("stroke-width", 1);
+                     d3.select(this).style("stroke", "black").attr("stroke-width", 1);
                    })
                    .on("click", function(d) {
 
@@ -231,14 +302,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
 
                         // Draw the circular heatmap
-                        drawCircularHeat(heat, regionID, geoData, mobileSensorReadings, staticSensorReadings);
+                        drawCircularHeat(heat, regionID, geoData, mobileSensorReadingsOriginal, staticSensorReadingsOriginal );
                         d3.select(".heat-chart-header").html("<h5 class='card-header'> Circular Heat Chart: " + regionNameMappings.get(regionID) + "</h5 ");
                    });
 
 
      // Always Safe Nuclear Plant
      map.append("g")
-        .attr("class", "nuclear-plant")
+        .attr("class", "nuclear-plant VASTMC3")
         .append("path")
         .attr("d", FACTORY_GLYPH)
         .attr("transform", "translate(" + mapProjection(alwaysSafePlantLocation)[0] + ", " + mapProjection(alwaysSafePlantLocation)[1] + ")scale(0.05)")
@@ -247,7 +318,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
      // Neighborhood names at the centroid of each polygon
      map.append("g")
-        .attr("class", "neighborhood-names")
+        .attr("class", "neighborhood-names VASTMC3")
         .selectAll("text")
         .data(geoData.features)
         .enter()
@@ -395,7 +466,7 @@ document.addEventListener('DOMContentLoaded', function() {
 //     d3.select(".heat-chart-header").html("<h5 class='card-header'> Circular Heat Chart: " + regionNameMappings.get(regionID) + "</h5 ");
 //   });
 
-   // Updates the timestamp on map header
+//    // Updates the timestamp on map header
    function getMapHeaderTimestamp(index, sensorID) {
      let timestamp = radiationMeasurements.get(sensorID).get("timestamps")[index];
      d3.select(".map-header").html("<h5 class='card-header'> St. Himark Map &nbsp; &nbsp;  <span class='badge badge-pill badge-dark'>Timestamp: " + timestamp + ":00</span> </h5 ");
@@ -452,8 +523,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // console.log(mobileSensorSet);
         // console.log(staticSensorSet);
     }
-
-  } // End of drawMap function
+  }
 
 
 
