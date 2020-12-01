@@ -1,90 +1,89 @@
 function drawCircularHeat(heat, regionID, geoData, mobileData, staticData) {
 
-  regionData = geoData.features.filter(d => {
-    return d.properties.Id == regionID;
-  });
+    regionData = geoData.features.filter(d => {
+        return d.properties.Id == regionID;
+    });
 
-  /* Label data */
-  var days = ['6th April 2020', '7th April 2020', '8th April 2020', '9th April 2020', '10th April 2020'];
-  var dayData = [];
-  var total = 0;
-  var ctr = 0;
-  var flag = 0;
-  var currentHour = mobileData[0]['Timestamp'].split(" ")[1].split(":")[0];
-  for (var i = 0; i < mobileData.length; i++) {
-      if (d3.geoContains(regionData[0], [ mobileData[i]["Long"], mobileData[i]["Lat"] ])) {
-        if (currentHour != mobileData[i]['Timestamp'].split(" ")[1].split(":")[0]) {
-            if (flag == 1) {
-                dayData.push(total / ctr);
-                ctr = 1;
-                total = parseFloat(mobileData[i]['Value']);
-                flag = 0;
+    /* Label data */
+    var days = ['6th April 2020', '7th April 2020', '8th April 2020', '9th April 2020', '10th April 2020'];
+    var dayData = [];
+    var total = 0;
+    var ctr = 0;
+    var flag = 0;
+    var currentHour = mobileData[0]['Timestamp'].split(" ")[1].split(":")[0];
+    for (var i = 0; i < mobileData.length; i++) {
+        if (d3.geoContains(regionData[0], [mobileData[i]["Long"], mobileData[i]["Lat"]])) {
+            if (currentHour != mobileData[i]['Timestamp'].split(" ")[1].split(":")[0]) {
+                if (flag == 1) {
+                    dayData.push(total / ctr);
+                    ctr = 1;
+                    total = parseFloat(mobileData[i]['Value']);
+                    flag = 0;
+                } else {
+                    flag += 1;
+                    total += parseFloat(mobileData[i]['Value']);
+                    ctr += 1;
+                }
+                currentHour = mobileData[i]['Timestamp'].split(" ")[1].split(":")[0];
+
+            } else {
+                total += parseFloat(mobileData[i]['Value']);
+                ctr += 1;
             }
-            else {
-              flag += 1;
-              total += parseFloat(mobileData[i]['Value']);
-              ctr += 1;
-            }
-            currentHour = mobileData[i]['Timestamp'].split(" ")[1].split(":")[0];
-
-        } else {
-            total += parseFloat(mobileData[i]['Value']);
-            ctr += 1;
-        }
-      }
-  }
-
-  while (dayData.length < 60)
-      dayData.push(0)
-
-  var total = 0;
-  var index = 0;
-  var ctr = 0;
-  var flag = 0;
-  var currentHour = staticData[0]['Timestamp'].split(" ")[1].split(":")[0];
-  for (var i = 0; i < staticData.length; i++) {
-      if (d3.geoContains(regionData[0], [ staticData[i]["Long"], staticData[i]["Lat"] ])) {
-        if (currentHour != staticData[i]['Timestamp'].split(" ")[1].split(":")[0]) {
-            if (flag == 1) {
-              var temp = dayData[index];
-              temp += (total / ctr);
-              dayData[index] = temp;
-              index++;
-              ctr = 1;
-              total = parseFloat(staticData[i]['Value']);
-              flag = 0;
-            }
-            else {
-              total += parseFloat(staticData[i]['Value']);
-              ctr += 1;
-              flag += 1;
-            }
-            currentHour = staticData[i]['Timestamp'].split(" ")[1].split(":")[0];
-
-        } else {
-            total += parseFloat(staticData[i]['Value']);
-            ctr += 1;
         }
     }
-  }
 
+    while (dayData.length < 60)
+        dayData.push(0)
 
-  /* Create the chart */
-  var chart = circularHeatChart()
-      .segmentHeight(15)
-      .innerRadius(15)
-      .numSegments(5)
-      .range(['white', 'blue'])
-      .segmentLabels(days)
-      .radialLabels([ "Midnight", "2am", "4am", "6am", "8am", "10am", "Midday", "2pm", "4pm", "6pm", "8pm", "10pm" ]);
+    var total = 0;
+    var index = 0;
+    var ctr = 0;
+    var flag = 0;
+    var currentHour = staticData[0]['Timestamp'].split(" ")[1].split(":")[0];
+    for (var i = 0; i < staticData.length; i++) {
+        if (d3.geoContains(regionData[0], [staticData[i]["Long"], staticData[i]["Lat"]])) {
+            if (currentHour != staticData[i]['Timestamp'].split(" ")[1].split(":")[0]) {
+                if (flag == 1) {
+                    var temp = dayData[index];
+                    temp += (total / ctr);
+                    dayData[index] = temp;
+                    index++;
+                    ctr = 1;
+                    total = parseFloat(staticData[i]['Value']);
+                    flag = 0;
+                } else {
+                    total += parseFloat(staticData[i]['Value']);
+                    ctr += 1;
+                    flag += 1;
+                }
+                currentHour = staticData[i]['Timestamp'].split(" ")[1].split(":")[0];
 
-  heat.selectAll('svg')
-      .data([dayData])
-      .enter()
-      .append('svg')
-      .call(chart);
+            } else {
+                total += parseFloat(staticData[i]['Value']);
+                ctr += 1;
+            }
+        }
+    }
 
-  }  // end of drawCircularHeat function
+    heat.selectAll("*").remove();
+
+    /* Create the chart */
+    var chart = circularHeatChart()
+        .segmentHeight(15)
+        .innerRadius(15)
+        .numSegments(5)
+        .range(['white', 'blue'])
+        .segmentLabels(days)
+        .radialLabels(["Midnight", "2am", "4am", "6am", "8am", "10am", "Midday", "2pm", "4pm", "6pm", "8pm", "10pm"]);
+
+    heat.selectAll('svg')
+        .data([dayData])
+        .enter()
+        .append('svg')
+        .call(chart);
+
+} // end of drawCircularHeat function
 
 
 function circularHeatChart() {
